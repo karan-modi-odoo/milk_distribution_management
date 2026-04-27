@@ -1,0 +1,24 @@
+<odoo>
+
+    <record id="ledger_list" model="ir.ui.view">
+        <field name="name">milk.partner.ledger.list</field>
+        <field name="model">milk.partner.ledger</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="partner_id" string="Dealer"/>
+                <field name="date"/>
+                <field name="opening_balance" string="Opening (Rs)" sum="Total"/>
+                <field name="today_bill" string="Bill (Rs)" sum="Total"/>
+                <field name="received_amount" string="Cash (Rs)" sum="Total"/>
+                <field name="closing_balance" string="Closing (Rs)" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="ledger_action" model="ir.actions.act_window">
+        <field name="name">Dealer Ledger</field>
+        <field name="res_model">milk.partner.ledger</field>
+        <field name="view_mode">list</field>
+    </record>
+
+</odoo>

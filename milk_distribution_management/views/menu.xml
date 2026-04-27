@@ -1,0 +1,56 @@
+<odoo>
+
+    <!-- Root -->
+    <menuitem id="milk_root" name="Milk ERP" sequence="50"/>
+
+    <!-- Main Operations -->
+    <menuitem id="menu_dispatch" parent="milk_root"
+              action="dispatch_action" name="Dispatch Sheets" sequence="10"/>
+
+    <menuitem id="menu_daily_summary" parent="milk_root"
+              action="daily_summary_action" name="Daily Summary" sequence="20"/>
+
+    <menuitem id="menu_ledger" parent="milk_root"
+              action="ledger_action" name="Dealer Ledger" sequence="30"/>
+
+    <menuitem id="menu_cash" parent="milk_root"
+              action="action_cash" name="Cash Collection" sequence="40"/>
+
+    <!-- Purchases from Amul -->
+    <menuitem id="menu_amul_purchase" parent="milk_root"
+              action="account.action_move_in_invoice_type"
+              name="Amul Purchases" sequence="50"/>
+
+    <!-- Reports Submenu -->
+    <menuitem id="milk_reports" parent="milk_root"
+              name="Reports" sequence="60"/>
+
+    <menuitem id="menu_outstanding" parent="milk_reports"
+              action="outstanding_report_action"
+              name="Outstanding Report" sequence="10"/>
+
+    <menuitem id="menu_dealer_statement" parent="milk_reports"
+              action="dealer_statement_action"
+              name="Dealer Statement" sequence="20"/>
+
+    <menuitem id="menu_product_sales" parent="milk_reports"
+              action="product_sales_report_action"
+              name="Product Sales Report" sequence="30"/>
+
+    <menuitem id="menu_driver_performance" parent="milk_reports"
+              action="driver_performance_action"
+              name="Driver Performance" sequence="40"/>
+
+    <menuitem id="menu_monthly_closing" parent="milk_reports"
+              action="monthly_closing_action"
+              name="Monthly Closing" sequence="50"/>
+
+    <!-- Configuration Submenu -->
+    <menuitem id="milk_config" parent="milk_root"
+              name="Configuration" sequence="70"/>
+
+    <menuitem id="menu_dealer_rates" parent="milk_config"
+              action="dealer_rate_action"
+              name="Dealer Rates" sequence="10"/>
+
+</odoo>

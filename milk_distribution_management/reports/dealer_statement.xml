@@ -1,0 +1,68 @@
+<odoo>
+
+    <record id="action_report_dealer_statement" model="ir.actions.report">
+        <field name="name">Dealer Statement</field>
+        <field name="model">milk.dealer.statement</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_dealer_statement</field>
+    </record>
+
+    <template id="report_dealer_statement">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div style="border-bottom:3px solid #1a73e8;padding-bottom:10px;margin-bottom:16px;">
+                            <h2 style="color:#1a73e8;margin:0;">DEALER STATEMENT</h2>
+                            <p style="margin:4px 0 0;font-size:13px;">
+                                <strong>Dealer:</strong> <t t-esc="doc.partner_id.name"/>
+                                <t t-if="doc.date_from">
+                                    &amp;nbsp;|&amp;nbsp;
+                                    <strong>From:</strong> <t t-esc="doc.date_from"/>
+                                </t>
+                                <t t-if="doc.date_to">
+                                    &amp;nbsp;|&amp;nbsp;
+                                    <strong>To:</strong> <t t-esc="doc.date_to"/>
+                                </t>
+                            </p>
+                        </div>
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead>
+                                <tr style="background:#1a73e8;color:white;">
+                                    <th style="padding:8px;text-align:center;">Date</th>
+                                    <th style="padding:8px;text-align:right;">Opening (Rs)</th>
+                                    <th style="padding:8px;text-align:right;">Bill (Rs)</th>
+                                    <th style="padding:8px;text-align:right;">Cash (Rs)</th>
+                                    <th style="padding:8px;text-align:right;">Closing (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:7px 8px;text-align:center;"><t t-esc="line.date"/></td>
+                                        <td style="padding:7px 8px;text-align:right;"><t t-esc="'%.2f' % line.opening_balance"/></td>
+                                        <td style="padding:7px 8px;text-align:right;"><t t-esc="'%.2f' % line.today_bill"/></td>
+                                        <td style="padding:7px 8px;text-align:right;color:#2e7d32;"><t t-esc="'%.2f' % line.received_amount"/></td>
+                                        <td style="padding:7px 8px;text-align:right;font-weight:bold;"><t t-esc="'%.2f' % line.closing_balance"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#e8f0fe;font-weight:bold;">
+                                    <td style="padding:8px;text-align:right;">Total</td>
+                                    <td style="padding:8px;"></td>
+                                    <td style="padding:8px;text-align:right;"><t t-esc="'%.2f' % doc.total_billed"/></td>
+                                    <td style="padding:8px;text-align:right;"><t t-esc="'%.2f' % doc.total_paid"/></td>
+                                    <td style="padding:8px;text-align:right;color:#1a73e8;">
+                                        Rs <t t-esc="'%.2f' % doc.closing_balance"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,56 @@
+<odoo>
+
+    <record id="action_report_product_sales" model="ir.actions.report">
+        <field name="name">Product Sales Report</field>
+        <field name="model">milk.product.sales.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_product_sales</field>
+    </record>
+
+    <template id="report_product_sales">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div style="border-bottom:3px solid #7b1fa2;padding-bottom:10px;margin-bottom:16px;">
+                            <h2 style="color:#7b1fa2;margin:0;">PRODUCT SALES REPORT</h2>
+                            <p style="margin:4px 0 0;font-size:13px;">
+                                From: <strong><t t-esc="doc.date_from"/></strong>
+                                &amp;nbsp;To&amp;nbsp;
+                                <strong><t t-esc="doc.date_to"/></strong>
+                            </p>
+                        </div>
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead>
+                                <tr style="background:#7b1fa2;color:white;">
+                                    <th style="padding:8px;text-align:left;">Product</th>
+                                    <th style="padding:8px;text-align:right;">Total Qty / Crates</th>
+                                    <th style="padding:8px;text-align:right;">Total Amount (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:7px 8px;"><t t-esc="line.product_id.name"/></td>
+                                        <td style="padding:7px 8px;text-align:right;font-weight:bold;"><t t-esc="line.total_qty"/></td>
+                                        <td style="padding:7px 8px;text-align:right;"><t t-esc="'%.2f' % line.total_amount"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#f3e5f5;font-weight:bold;">
+                                    <td style="padding:8px;">Grand Total</td>
+                                    <td></td>
+                                    <td style="padding:8px;text-align:right;color:#7b1fa2;">
+                                        Rs <t t-esc="'%.2f' % doc.total_amount"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

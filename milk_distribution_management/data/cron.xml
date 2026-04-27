@@ -1,0 +1,27 @@
+<odoo>
+    <data noupdate="1">
+
+        <!-- Auto Carry Forward — runs daily at 11 PM -->
+        <record id="cron_auto_carry_forward" model="ir.cron">
+            <field name="name">Milk: Auto Carry Forward Ledger</field>
+            <field name="model_id" ref="model_milk_partner_ledger"/>
+            <field name="state">code</field>
+            <field name="code">model.action_auto_carry_forward()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Weekly WhatsApp Summary — runs every Sunday -->
+        <record id="cron_weekly_whatsapp" model="ir.cron">
+            <field name="name">Milk: Weekly WhatsApp Outstanding Summary</field>
+            <field name="model_id" ref="model_milk_partner_ledger"/>
+            <field name="state">code</field>
+            <field name="code">model.action_send_weekly_whatsapp()</field>
+            <field name="interval_number">7</field>
+            <field name="interval_type">days</field>
+            <field name="active">False</field>
+        </record>
+
+    </data>
+</odoo>

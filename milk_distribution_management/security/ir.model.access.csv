@@ -1,0 +1,20 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dispatch_sheet,Dispatch Sheet,model_milk_dispatch_sheet,base.group_user,1,1,1,1
+access_dispatch_line,Dispatch Line,model_milk_dispatch_line,base.group_user,1,1,1,1
+access_product_line,Product Line,model_milk_dispatch_product_line,base.group_user,1,1,1,1
+access_partner_ledger,Partner Ledger,model_milk_partner_ledger,base.group_user,1,1,1,1
+access_cash_collection,Cash Collection,model_milk_cash_collection,base.group_user,1,1,1,1
+access_cash_line,Cash Line,model_milk_cash_collection_line,base.group_user,1,1,1,1
+access_daily_summary,Daily Summary,model_milk_daily_summary,base.group_user,1,1,1,1
+access_daily_summary_line,Daily Summary Line,model_milk_daily_summary_line,base.group_user,1,1,1,1
+access_dealer_rate,Dealer Rate,model_milk_dealer_rate,base.group_user,1,1,1,1
+access_outstanding_report,Outstanding Report,model_milk_outstanding_report,base.group_user,1,1,1,1
+access_outstanding_report_line,Outstanding Report Line,model_milk_outstanding_report_line,base.group_user,1,1,1,1
+access_dealer_statement,Dealer Statement,model_milk_dealer_statement,base.group_user,1,1,1,1
+access_dealer_statement_line,Dealer Statement Line,model_milk_dealer_statement_line,base.group_user,1,1,1,1
+access_product_sales_report,Product Sales Report,model_milk_product_sales_report,base.group_user,1,1,1,1
+access_product_sales_line,Product Sales Line,model_milk_product_sales_report_line,base.group_user,1,1,1,1
+access_driver_performance,Driver Performance,model_milk_driver_performance,base.group_user,1,1,1,1
+access_driver_performance_line,Driver Performance Line,model_milk_driver_performance_line,base.group_user,1,1,1,1
+access_monthly_closing,Monthly Closing,model_milk_monthly_closing,base.group_user,1,1,1,1
+access_monthly_closing_line,Monthly Closing Line,model_milk_monthly_closing_line,base.group_user,1,1,1,1

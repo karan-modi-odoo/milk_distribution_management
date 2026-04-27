@@ -1,0 +1,48 @@
+<odoo>
+
+    <record id="monthly_closing_form" model="ir.ui.view">
+        <field name="name">milk.monthly.closing.form</field>
+        <field name="model">milk.monthly.closing</field>
+        <field name="arch" type="xml">
+            <form string="Monthly Closing Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="month"/>
+                            <field name="year"/>
+                        </group>
+                        <group>
+                            <field name="total_billed" string="Total Billed (Rs)" readonly="1"/>
+                            <field name="total_paid" string="Total Paid (Rs)" readonly="1"/>
+                            <field name="total_closing" string="Total Closing (Rs)" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <button name="action_generate" type="object"
+                                string="Generate" class="btn-primary"/>
+                        <button name="action_print" type="object"
+                                string="Print PDF" class="btn-secondary"
+                                invisible="not line_ids"/>
+                    </group>
+                    <field name="line_ids" readonly="1">
+                        <list>
+                            <field name="partner_id" string="Dealer"/>
+                            <field name="opening_balance" string="Opening (Rs)" sum="Total"/>
+                            <field name="total_billed" string="Billed (Rs)" sum="Total"/>
+                            <field name="total_paid" string="Paid (Rs)" sum="Total"/>
+                            <field name="closing_balance" string="Closing (Rs)" sum="Total"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="monthly_closing_action" model="ir.actions.act_window">
+        <field name="name">Monthly Closing</field>
+        <field name="res_model">milk.monthly.closing</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

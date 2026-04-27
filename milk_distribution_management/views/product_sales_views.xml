@@ -1,0 +1,44 @@
+<odoo>
+
+    <record id="product_sales_report_form" model="ir.ui.view">
+        <field name="name">milk.product.sales.report.form</field>
+        <field name="model">milk.product.sales.report</field>
+        <field name="arch" type="xml">
+            <form string="Product Sales Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date_from" string="From Date"/>
+                            <field name="date_to" string="To Date"/>
+                        </group>
+                        <group>
+                            <field name="total_amount" string="Grand Total (Rs)" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <button name="action_generate" type="object"
+                                string="Generate" class="btn-primary"/>
+                        <button name="action_print" type="object"
+                                string="Print PDF" class="btn-secondary"
+                                invisible="not line_ids"/>
+                    </group>
+                    <field name="line_ids" readonly="1">
+                        <list>
+                            <field name="product_id" string="Product"/>
+                            <field name="total_qty" string="Total Qty / Crates" sum="Total"/>
+                            <field name="total_amount" string="Total Amount (Rs)" sum="Total"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="product_sales_report_action" model="ir.actions.act_window">
+        <field name="name">Product Sales Report</field>
+        <field name="res_model">milk.product.sales.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

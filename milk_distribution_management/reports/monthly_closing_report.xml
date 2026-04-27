@@ -1,0 +1,121 @@
+<odoo>
+
+    <record id="action_report_monthly_closing" model="ir.actions.report">
+        <field name="name">Monthly Closing Report</field>
+        <field name="model">milk.monthly.closing</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_monthly_closing</field>
+    </record>
+
+    <!-- Driver Performance report action (no separate XML file needed) -->
+    <record id="action_report_driver_performance" model="ir.actions.report">
+        <field name="name">Driver Performance</field>
+        <field name="model">milk.driver.performance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_driver_performance</field>
+    </record>
+
+    <template id="report_monthly_closing">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div style="border-bottom:3px solid #e65100;padding-bottom:10px;margin-bottom:16px;">
+                            <h2 style="color:#e65100;margin:0;">MONTHLY CLOSING REPORT</h2>
+                            <p style="margin:4px 0 0;font-size:13px;">
+                                Month: <strong>
+                                    <t t-if="doc.month == '1'">January</t>
+                                    <t t-elif="doc.month == '2'">February</t>
+                                    <t t-elif="doc.month == '3'">March</t>
+                                    <t t-elif="doc.month == '4'">April</t>
+                                    <t t-elif="doc.month == '5'">May</t>
+                                    <t t-elif="doc.month == '6'">June</t>
+                                    <t t-elif="doc.month == '7'">July</t>
+                                    <t t-elif="doc.month == '8'">August</t>
+                                    <t t-elif="doc.month == '9'">September</t>
+                                    <t t-elif="doc.month == '10'">October</t>
+                                    <t t-elif="doc.month == '11'">November</t>
+                                    <t t-elif="doc.month == '12'">December</t>
+                                </strong>
+                                <t t-esc="doc.year"/>
+                            </p>
+                        </div>
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead>
+                                <tr style="background:#e65100;color:white;">
+                                    <th style="padding:8px;text-align:left;">Dealer</th>
+                                    <th style="padding:8px;text-align:right;">Opening (Rs)</th>
+                                    <th style="padding:8px;text-align:right;">Total Billed (Rs)</th>
+                                    <th style="padding:8px;text-align:right;">Total Paid (Rs)</th>
+                                    <th style="padding:8px;text-align:right;">Closing (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:7px 8px;"><t t-esc="line.partner_id.name"/></td>
+                                        <td style="padding:7px 8px;text-align:right;"><t t-esc="'%.2f' % line.opening_balance"/></td>
+                                        <td style="padding:7px 8px;text-align:right;"><t t-esc="'%.2f' % line.total_billed"/></td>
+                                        <td style="padding:7px 8px;text-align:right;color:#2e7d32;"><t t-esc="'%.2f' % line.total_paid"/></td>
+                                        <td style="padding:7px 8px;text-align:right;font-weight:bold;"><t t-esc="'%.2f' % line.closing_balance"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#fbe9e7;font-weight:bold;">
+                                    <td style="padding:8px;">Total</td>
+                                    <td style="padding:8px;"></td>
+                                    <td style="padding:8px;text-align:right;"><t t-esc="'%.2f' % doc.total_billed"/></td>
+                                    <td style="padding:8px;text-align:right;"><t t-esc="'%.2f' % doc.total_paid"/></td>
+                                    <td style="padding:8px;text-align:right;color:#e65100;">
+                                        Rs <t t-esc="'%.2f' % doc.total_closing"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_driver_performance">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div style="border-bottom:3px solid #0277bd;padding-bottom:10px;margin-bottom:16px;">
+                            <h2 style="color:#0277bd;margin:0;">DRIVER PERFORMANCE REPORT</h2>
+                            <p style="margin:4px 0 0;font-size:13px;">
+                                From: <strong><t t-esc="doc.date_from"/></strong>
+                                &amp;nbsp;To&amp;nbsp;
+                                <strong><t t-esc="doc.date_to"/></strong>
+                            </p>
+                        </div>
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                            <thead>
+                                <tr style="background:#0277bd;color:white;">
+                                    <th style="padding:8px;text-align:left;">Driver</th>
+                                    <th style="padding:8px;text-align:center;">Sheets</th>
+                                    <th style="padding:8px;text-align:center;">Dealers Covered</th>
+                                    <th style="padding:8px;text-align:right;">Total Amount (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:7px 8px;"><t t-esc="line.driver_id.name"/></td>
+                                        <td style="padding:7px 8px;text-align:center;"><t t-esc="line.total_sheets"/></td>
+                                        <td style="padding:7px 8px;text-align:center;"><t t-esc="line.total_dealers"/></td>
+                                        <td style="padding:7px 8px;text-align:right;font-weight:bold;"><t t-esc="'%.2f' % line.total_amount"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

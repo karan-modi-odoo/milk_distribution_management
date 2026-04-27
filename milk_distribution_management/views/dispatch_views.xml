@@ -1,0 +1,94 @@
+<odoo>
+
+    <record id="dispatch_list" model="ir.ui.view">
+        <field name="name">milk.dispatch.sheet.list</field>
+        <field name="model">milk.dispatch.sheet</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'confirmed'"
+                  decoration-warning="state == 'draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="route"/>
+                <field name="driver_id"/>
+                <field name="total_dealers"/>
+                <field name="total_amount" sum="Grand Total"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="dispatch_form" model="ir.ui.view">
+        <field name="name">milk.dispatch.sheet.form</field>
+        <field name="model">milk.dispatch.sheet</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object"
+                            string="Confirm and Create Invoices"
+                            class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoices" type="object"
+                                class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="invoice_count == 0">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-users" type="object">
+                            <field name="total_dealers" widget="statinfo" string="Dealers"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Dispatch Info">
+                            <field name="date"/>
+                            <field name="route"/>
+                        </group>
+                        <group string="Driver Info">
+                            <field name="driver_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Dealer Lines" name="lines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="partner_id"/>
+                                    <field name="total_amount" readonly="1"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="partner_id"/>
+                                    </group>
+                                    <field name="product_line_ids">
+                                        <list editable="bottom">
+                                            <field name="product_id"/>
+                                            <field name="qty" string="Qty/Crates"/>
+                                            <field name="rate" string="Rate (Rs)"/>
+                                            <field name="amount" string="Amount (Rs)" readonly="1"/>
+                                        </list>
+                                    </field>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group>
+                        <field name="total_amount" string="Sheet Total (Rs)" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="dispatch_action" model="ir.actions.act_window">
+        <field name="name">Dispatch Sheets</field>
+        <field name="res_model">milk.dispatch.sheet</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

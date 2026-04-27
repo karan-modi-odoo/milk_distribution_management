@@ -1,0 +1,62 @@
+<odoo>
+
+    <record id="view_cash_form" model="ir.ui.view">
+        <field name="name">milk.cash.collection.form</field>
+        <field name="model">milk.cash.collection</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object"
+                            string="Confirm Collection" class="btn-primary"/>
+                    <button name="action_print_receipt" type="object"
+                            string="Print Receipt" class="btn-secondary"
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="collector_id"/>
+                        </group>
+                        <group>
+                            <field name="total_collected" string="Total Collected (Rs)" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom">
+                            <field name="partner_id" string="Dealer"/>
+                            <field name="outstanding" string="Outstanding (Rs)" readonly="1"/>
+                            <field name="collected_amount" string="Collected (Rs)"/>
+                            <field name="balance_after" string="Balance After (Rs)" readonly="1"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_cash_list" model="ir.ui.view">
+        <field name="name">milk.cash.collection.list</field>
+        <field name="model">milk.cash.collection</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'confirmed'"
+                  decoration-warning="state == 'draft'">
+                <field name="date"/>
+                <field name="collector_id"/>
+                <field name="total_collected" string="Total (Rs)" sum="Grand Total"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_cash" model="ir.actions.act_window">
+        <field name="name">Cash Collection</field>
+        <field name="res_model">milk.cash.collection</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>
