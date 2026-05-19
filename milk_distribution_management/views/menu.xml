@@ -1,56 +1,128 @@
 <odoo>
 
-    <!-- Root -->
-    <menuitem id="milk_root" name="Milk ERP" sequence="50"/>
+    <!-- ── Root ──────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_root" name="Milk ERP" sequence="10"
+              web_icon="milk_distribution_management,static/description/icon.png"/>
+    <!-- ── Dispatch ──────────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_dispatch" name="Dispatch"
+              parent="menu_milk_root" sequence="10"/>
+    <menuitem id="menu_milk_dispatch_sheets" name="Dispatch Sheets"
+              parent="menu_milk_dispatch" sequence="10"
+              action="dispatch_action"/>
+    <menuitem id="menu_milk_delivery_adjustments" name="Delivery Adjustments"
+              parent="menu_milk_dispatch" sequence="20"
+              action="action_delivery_adjustment"/>
 
-    <!-- Main Operations -->
-    <menuitem id="menu_dispatch" parent="milk_root"
-              action="dispatch_action" name="Dispatch Sheets" sequence="10"/>
+    <!-- ── Cash ──────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_cash" name="Cash Collection"
+              parent="menu_milk_root" sequence="20"/>
+    <menuitem id="menu_milk_cash_collections" name="Collections"
+              parent="menu_milk_cash" sequence="10"
+              action="action_cash"/>
+    <menuitem id="menu_milk_quick_cash_wizard" name="Bulk Collection"
+              parent="menu_milk_cash" sequence="15"
+              action="action_quick_cash_wizard"/>
+    <menuitem id="menu_milk_bank_deposits" name="Bank Deposits"
+              parent="menu_milk_cash" sequence="20"
+              action="action_bank_deposit"/>
 
-    <menuitem id="menu_daily_summary" parent="milk_root"
-              action="daily_summary_action" name="Daily Summary" sequence="20"/>
+    <!-- ── Dairy ──────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_dairy" name="Dairy"
+              parent="menu_milk_root" sequence="30"/>
+    <menuitem id="menu_milk_dairy_orders" name="Dairy Orders"
+              parent="menu_milk_dairy" sequence="10"
+              action="action_dairy_order"/>
+    <menuitem id="menu_milk_dairy_purchase" name="Dairy Purchase Bills"
+              parent="menu_milk_dairy" sequence="20"
+              action="action_dairy_purchase"/>
+    <menuitem id="menu_milk_dairy_ledger" name="Dairy Ledger"
+              parent="menu_milk_dairy" sequence="25"
+              action="action_dairy_ledger"/>
+    <menuitem id="menu_milk_dairy_transfers" name="Dairy Transfers"
+              parent="menu_milk_dairy" sequence="30"
+              action="action_dairy_transfer"/>
 
-    <menuitem id="menu_ledger" parent="milk_root"
-              action="ledger_action" name="Dealer Ledger" sequence="30"/>
+    <!-- ── Crates ─────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_crates" name="Crates"
+              parent="menu_milk_root" sequence="40"/>
+    <menuitem id="menu_milk_crate_transactions" name="Crate Transactions"
+              parent="menu_milk_crates" sequence="10"
+              action="action_crate_transaction"/>
+    <menuitem id="menu_milk_crate_ledger" name="Crate Ledger"
+              parent="menu_milk_crates" sequence="20"
+              action="action_crate_ledger"/>
+    <!-- Feature 1: Crate Billing entries -->
+    <menuitem id="menu_milk_crate_billing" name="Crate Billing"
+              parent="menu_milk_crates" sequence="30"
+              action="action_crate_billing"/>
+    <menuitem id="menu_milk_crate_billing_wizard" name="Generate Crate Billing"
+              parent="menu_milk_crates" sequence="40"
+              action="action_crate_billing_wizard"
+              groups="milk_distribution_management.group_milk_manager"/>
 
-    <menuitem id="menu_cash" parent="milk_root"
-              action="action_cash" name="Cash Collection" sequence="40"/>
+    <!-- ── Ledger ─────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_ledger" name="Ledger"
+              parent="menu_milk_root" sequence="50"/>
+    <menuitem id="menu_milk_partner_ledger" name="Partner Ledger"
+              parent="menu_milk_ledger" sequence="10"
+              action="ledger_action"/>
+    <menuitem id="menu_milk_daily_summary" name="Daily Summary"
+              parent="menu_milk_ledger" sequence="20"
+              action="daily_summary_action"/>
 
-    <!-- Purchases from Amul -->
-    <menuitem id="menu_amul_purchase" parent="milk_root"
-              action="account.action_move_in_invoice_type"
-              name="Amul Purchases" sequence="50"/>
+    <!-- ── Reports ────────────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_reports" name="Reports"
+              parent="menu_milk_root" sequence="60"/>
+    <menuitem id="menu_milk_dealer_statement" name="Dealer Statement"
+              parent="menu_milk_reports" sequence="10"
+              action="dealer_statement_action"/>
+    <menuitem id="menu_milk_outstanding" name="Outstanding Report"
+              parent="menu_milk_reports" sequence="20"
+              action="outstanding_report_action"/>
+    <menuitem id="menu_milk_product_sales" name="Product Sales"
+              parent="menu_milk_reports" sequence="30"
+              action="product_sales_report_action"/>
+    <menuitem id="menu_milk_driver_performance" name="Driver Performance"
+              parent="menu_milk_reports" sequence="40"
+              action="driver_performance_action"/>
+    <menuitem id="menu_milk_monthly_closing" name="Monthly Closing"
+              parent="menu_milk_reports" sequence="50"
+              action="monthly_closing_action"/>
 
-    <!-- Reports Submenu -->
-    <menuitem id="milk_reports" parent="milk_root"
-              name="Reports" sequence="60"/>
+    <menuitem id="menu_milk_periodic_crate_orders" name="Periodic Crate Orders"
+              parent="menu_milk_reports" sequence="55"
+              action="action_periodic_crate_order_report"/>
+    <menuitem id="menu_milk_periodic_dealer_crates" name="Dealer Crate Usage"
+              parent="menu_milk_reports" sequence="56"
+              action="action_periodic_dealer_crate_report"/>
+    <menuitem id="menu_milk_periodic_ledger" name="Periodic Ledger"
+              parent="menu_milk_reports" sequence="57"
+              action="action_periodic_ledger_report"/>
+    <menuitem id="menu_milk_payment_mode_report" name="Payment Mode Report"
+              parent="menu_milk_reports" sequence="58"
+              action="action_payment_mode_report"/>
+    <menuitem id="menu_milk_pl_summary" name="P&amp;L Summary"
+              parent="menu_milk_reports" sequence="59"
+              action="action_pl_summary"/>
 
-    <menuitem id="menu_outstanding" parent="milk_reports"
-              action="outstanding_report_action"
-              name="Outstanding Report" sequence="10"/>
+    <!-- ── Configuration ─────────────────────────────────────────────────── -->
+    <menuitem id="menu_milk_config" name="Configuration"
+              parent="menu_milk_root" sequence="70"/>
+    <!-- Feature 5: Routes configuration -->
+    <menuitem id="menu_milk_routes" name="Delivery Routes"
+              parent="menu_milk_config" sequence="20"
+              action="action_milk_route"
+              groups="milk_distribution_management.group_milk_manager"/>
 
-    <menuitem id="menu_dealer_statement" parent="milk_reports"
-              action="dealer_statement_action"
-              name="Dealer Statement" sequence="20"/>
+    <!-- Dealer Default Orders — configuration for auto-fill on dispatch sheet -->
+    <menuitem id="menu_milk_dealer_default_orders" name="Dealer Default Orders"
+              parent="menu_milk_config" sequence="30"
+              action="action_dealer_default_order"
+              groups="milk_distribution_management.group_milk_manager"/>
 
-    <menuitem id="menu_product_sales" parent="milk_reports"
-              action="product_sales_report_action"
-              name="Product Sales Report" sequence="30"/>
-
-    <menuitem id="menu_driver_performance" parent="milk_reports"
-              action="driver_performance_action"
-              name="Driver Performance" sequence="40"/>
-
-    <menuitem id="menu_monthly_closing" parent="milk_reports"
-              action="monthly_closing_action"
-              name="Monthly Closing" sequence="50"/>
-
-    <!-- Configuration Submenu -->
-    <menuitem id="milk_config" parent="milk_root"
-              name="Configuration" sequence="70"/>
-
-    <menuitem id="menu_dealer_rates" parent="milk_config"
-              action="dealer_rate_action"
-              name="Dealer Rates" sequence="10"/>
+    <!-- Dispatch sub-menu: view all default order templates (read-only for users) -->
+    <menuitem id="menu_milk_dispatch_default_orders" name="Dealer Default Orders"
+              parent="menu_milk_dispatch" sequence="30"
+              action="action_dealer_default_order"/>
 
 </odoo>

@@ -1,0 +1,179 @@
+<odoo>
+
+    <!-- ══ Inline list — Deduction mode (product_line_id shown) ═══════════ -->
+    <record id="view_delivery_adjustment_line_list" model="ir.ui.view">
+        <field name="name">milk.delivery.adjustment.line.list</field>
+        <field name="model">milk.delivery.adjustment.line</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="product_id"/>
+                <field name="original_qty" string="Original Qty"
+                       optional="show"/>
+                <field name="original_rate" string="Rate (Rs)"/>
+                <field name="adjust_qty" string="Qty"/>
+                <field name="adjustment_amount" string="Amount (Rs)"
+                       readonly="1" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Form View ════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_adjustment_form" model="ir.ui.view">
+        <field name="name">milk.delivery.adjustment.form</field>
+        <field name="model">milk.delivery.adjustment</field>
+        <field name="arch" type="xml">
+            <form string="Delivery Adjustment">
+                <header>
+                    <button name="action_submit" string="Submit"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve"
+                            type="object" class="btn-success"
+                            invisible="state != 'submitted'"
+                            groups="milk_distribution_management.group_milk_manager"/>
+                    <button name="action_reject" string="Reject"
+                            type="object" class="btn-danger"
+                            invisible="state not in ('draft','submitted')"
+                            groups="milk_distribution_management.group_milk_manager"/>
+                    <button name="action_reset_draft" string="Reset to Draft"
+                            type="object"
+                            invisible="state != 'rejected'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Adjustment Info">
+                            <!-- Feature 6: type selector -->
+                            <field name="adjustment_type"
+                                   widget="radio"
+                                   readonly="state not in ('draft',)"/>
+                            <field name="sheet_id"
+                                   readonly="state not in ('draft',)"
+                                   domain="[('state','in',('confirmed','delivered'))]"/>
+                            <field name="dispatch_line_id"
+                                   readonly="state not in ('draft',)"
+                                   domain="[('sheet_id','=',sheet_id)]"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group string="Totals">
+                            <field name="date"
+                                   readonly="state not in ('draft',)"/>
+                            <field name="total_adjustment" readonly="1"/>
+                            <!-- credit_note_id doubles as the debit invoice ref -->
+                            <field name="credit_note_id" readonly="1"
+                                   string="Accounting Entry"
+                                   invisible="not credit_note_id"/>
+                        </group>
+                    </group>
+                    <group string="Reason">
+                        <field name="reason" nolabel="1"
+                               readonly="state not in ('draft',)"
+                               placeholder="Describe why this adjustment is needed…"/>
+                    </group>
+
+                    <!-- Inline hint banner for Addition type -->
+                    <div class="alert alert-info" role="alert"
+                         invisible="adjustment_type != 'addition'">
+                        <strong>Addition:</strong> Enter the extra products
+                        delivered by the driver. Rate per unit is required.
+                        An invoice will be raised for the dealer.
+                    </div>
+                    <!-- Inline hint banner for Deduction type -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="adjustment_type != 'deduction'">
+                        <strong>Deduction:</strong> Lines are pre-filled from
+                        the dispatch line. Enter the quantity not delivered.
+                        A credit note will be issued.
+                    </div>
+
+                    <notebook>
+                        <page string="Products">
+                            <field name="line_ids"
+                                   readonly="state not in ('draft',)"
+                                   view_id="view_delivery_adjustment_line_list"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ List View ════════════════════════════════════════════════════════ -->
+    <record id="view_delivery_adjustment_list" model="ir.ui.view">
+        <field name="name">milk.delivery.adjustment.list</field>
+        <field name="model">milk.delivery.adjustment</field>
+        <field name="arch" type="xml">
+            <list string="Delivery Adjustments"
+                  decoration-success="state == 'approved'"
+                  decoration-warning="state == 'submitted'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-muted="state == 'draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="adjustment_type" widget="badge"
+                       decoration-danger="adjustment_type == 'deduction'"
+                       decoration-success="adjustment_type == 'addition'"/>
+                <field name="sheet_id"/>
+                <field name="partner_id"/>
+                <field name="total_adjustment" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-warning="state == 'submitted'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="credit_note_id" string="Accounting Entry"
+                       optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Search View ══════════════════════════════════════════════════════ -->
+    <record id="view_delivery_adjustment_search" model="ir.ui.view">
+        <field name="name">milk.delivery.adjustment.search</field>
+        <field name="model">milk.delivery.adjustment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Reference"/>
+                <field name="partner_id" string="Dealer" domain="[('milk_is_dealer', '=', True)]"/>
+                <field name="sheet_id" string="Dispatch Sheet"/>
+                <filter string="Draft" name="draft"
+                        domain="[('state','=','draft')]"/>
+                <filter string="Submitted" name="submitted"
+                        domain="[('state','=','submitted')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state','=','approved')]"/>
+                <filter string="Rejected" name="rejected"
+                        domain="[('state','=','rejected')]"/>
+                <separator/>
+                <filter string="Deductions" name="deductions"
+                        domain="[('adjustment_type','=','deduction')]"/>
+                <filter string="Additions" name="additions"
+                        domain="[('adjustment_type','=','addition')]"/>
+                <group>
+                    <filter string="Type" name="by_type"
+                            context="{'group_by':'adjustment_type'}"/>
+                    <filter string="Dealer" name="by_partner"
+                            context="{'group_by':'partner_id'}"/>
+                    <filter string="State" name="by_state"
+                            context="{'group_by':'state'}"/>
+                    <filter string="Date" name="by_date"
+                            context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Window Action ════════════════════════════════════════════════════ -->
+    <record id="action_delivery_adjustment" model="ir.actions.act_window">
+        <field name="name">Delivery Adjustments</field>
+        <field name="res_model">milk.delivery.adjustment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_delivery_adjustment_search"/>
+        <field name="context">{'search_default_submitted': 1}</field>
+    </record>
+
+</odoo>

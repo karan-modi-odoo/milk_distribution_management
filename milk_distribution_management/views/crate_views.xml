@@ -1,0 +1,118 @@
+<odoo>
+
+    <!-- ── Crate Transaction ────────────────────────────────────────────── -->
+
+    <record id="view_crate_transaction_form" model="ir.ui.view">
+        <field name="name">milk.crate.transaction.form</field>
+        <field name="model">milk.crate.transaction</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object"
+                            string="Confirm" class="btn-primary"
+                            invisible="state == 'confirmed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="partner_id"/>
+                            <field name="move_type"/>
+                        </group>
+                        <group>
+                            <field name="qty"/>
+                            <field name="balance_after" readonly="1"/>
+                            <field name="dispatch_sheet_id" readonly="1"/>
+                            <field name="notes"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_crate_transaction_list" model="ir.ui.view">
+        <field name="name">milk.crate.transaction.list</field>
+        <field name="model">milk.crate.transaction</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'confirmed'"
+                  decoration-warning="state == 'draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id" string="Dealer"/>
+                <field name="move_type" widget="badge"
+                       decoration-success="move_type == 'return'"
+                       decoration-info="move_type == 'issue'"/>
+                <field name="qty" string="Crates"/>
+                <field name="balance_after" string="Balance After"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_crate_transaction" model="ir.actions.act_window">
+        <field name="name">Crate Transactions</field>
+        <field name="res_model">milk.crate.transaction</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ── Crate Ledger (generated view) ────────────────────────────────── -->
+
+    <record id="view_crate_ledger_list" model="ir.ui.view">
+        <field name="name">milk.crate.ledger.list</field>
+        <field name="model">milk.crate.ledger</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date"/>
+                <field name="partner_id" string="Dealer"/>
+                <field name="opening" string="Opening" sum="Total"/>
+                <field name="issued"   string="Issued"  sum="Total"/>
+                <field name="returned" string="Returned" sum="Total"/>
+                <field name="closing"  string="Closing"  sum="Total"
+                       decoration-danger="closing &gt; 0"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_crate_ledger" model="ir.actions.act_window">
+        <field name="name">Crate Ledger</field>
+        <field name="res_model">milk.crate.ledger</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <!-- ── Crate Ledger Wizard ───────────────────────────────────────────── -->
+
+    <record id="view_crate_ledger_wizard_form" model="ir.ui.view">
+        <field name="name">milk.crate.ledger.wizard.form</field>
+        <field name="model">milk.crate.ledger.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Crate Ledger">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </group>
+                <footer>
+                    <button name="action_generate" type="object"
+                            string="Generate" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_crate_ledger_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Crate Ledger</field>
+        <field name="res_model">milk.crate.ledger.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

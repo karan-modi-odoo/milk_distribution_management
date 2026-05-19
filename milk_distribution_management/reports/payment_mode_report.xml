@@ -1,0 +1,146 @@
+<odoo>
+
+    <record id="action_report_payment_mode" model="ir.actions.report">
+        <field name="name">Payment Mode Report</field>
+        <field name="model">milk.payment.mode.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_payment_mode</field>
+    </record>
+
+    <template id="report_payment_mode">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Header -->
+                        <div style="border-bottom:3px solid #1a73e8;padding-bottom:10px;margin-bottom:16px;">
+                            <h2 style="color:#1a73e8;margin:0;">PAYMENT MODE REPORT</h2>
+                            <span style="font-size:13px;">
+                                <t t-esc="company.name"/> &#160;|&#160;
+                                Period:
+                                <t t-esc="doc.date_from.strftime('%d-%m-%Y')"/>
+                                to
+                                <t t-esc="doc.date_to.strftime('%d-%m-%Y')"/>
+                            </span>
+                        </div>
+
+                        <!-- Section 1: Mode Summary -->
+                        <h4 style="color:#333;margin-bottom:8px;">Mode-wise Collection Summary</h4>
+                        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;">
+                            <thead>
+                                <tr style="background:#1a73e8;color:white;">
+                                    <th style="padding:8px;text-align:left;">Payment Mode</th>
+                                    <th style="padding:8px;text-align:center;">Transactions</th>
+                                    <th style="padding:8px;text-align:right;">Total Collected (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr style="border-bottom:1px solid #eee;">
+                                        <td style="padding:7px 8px;font-weight:bold;">
+                                            <t t-esc="dict(line._fields['payment_mode'].selection).get(line.payment_mode, line.payment_mode)"/>
+                                        </td>
+                                        <td style="padding:7px 8px;text-align:center;">
+                                            <t t-esc="line.txn_count"/>
+                                        </td>
+                                        <td style="padding:7px 8px;text-align:right;">
+                                            <t t-esc="'%.2f' % line.total_amount"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#e8f0fe;font-weight:bold;">
+                                    <td colspan="2" style="padding:8px;text-align:right;">Grand Total</td>
+                                    <td style="padding:8px;text-align:right;color:#1a73e8;">
+                                        Rs
+                                        <t t-esc="'%.2f' % doc.grand_total"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Section 2: Daily Reconciliation -->
+                        <h4 style="color:#333;margin-bottom:8px;">Daily Cash-in-Hand vs Bank Deposit Reconciliation</h4>
+                        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                            <thead>
+                                <tr style="background:#1a73e8;color:white;">
+                                    <th style="padding:7px;text-align:left;">Date</th>
+                                    <th style="padding:7px;text-align:right;">Cash</th>
+                                    <th style="padding:7px;text-align:right;">UPI</th>
+                                    <th style="padding:7px;text-align:right;">Cheque</th>
+                                    <th style="padding:7px;text-align:right;">NEFT/RTGS</th>
+                                    <th style="padding:7px;text-align:right;">Total Collected</th>
+                                    <th style="padding:7px;text-align:right;">Bank Deposited</th>
+                                    <th style="padding:7px;text-align:right;">Cash in Hand</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.daily_ids" t-as="dl">
+                                    <tr t-attf-style="border-bottom:1px solid #eee;#{dl.cash_in_hand &lt; 0 and 'color:#d32f2f;' or ''}">
+                                        <td style="padding:6px 7px;">
+                                            <t t-esc="dl.date.strftime('%d-%m-%Y')"/>
+                                        </td>
+                                        <td style="padding:6px 7px;text-align:right;">
+                                            <t t-esc="'%.2f' % dl.cash_collected"/>
+                                        </td>
+                                        <td style="padding:6px 7px;text-align:right;">
+                                            <t t-esc="'%.2f' % dl.upi_collected"/>
+                                        </td>
+                                        <td style="padding:6px 7px;text-align:right;">
+                                            <t t-esc="'%.2f' % dl.cheque_collected"/>
+                                        </td>
+                                        <td style="padding:6px 7px;text-align:right;">
+                                            <t t-esc="'%.2f' % dl.neft_collected"/>
+                                        </td>
+                                        <td style="padding:6px 7px;text-align:right;font-weight:bold;">
+                                            <t t-esc="'%.2f' % dl.total_collected"/>
+                                        </td>
+                                        <td style="padding:6px 7px;text-align:right;">
+                                            <t t-esc="'%.2f' % dl.bank_deposited"/>
+                                        </td>
+                                        <td style="padding:6px 7px;text-align:right;font-weight:bold;">
+                                            <t t-esc="'%.2f' % dl.cash_in_hand"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#e8f0fe;font-weight:bold;">
+                                    <td style="padding:7px;">Total</td>
+                                    <td style="padding:7px;text-align:right;">
+                                        <t t-esc="'%.2f' % doc.total_cash"/>
+                                    </td>
+                                    <td style="padding:7px;text-align:right;">
+                                        <t t-esc="'%.2f' % doc.total_upi"/>
+                                    </td>
+                                    <td style="padding:7px;text-align:right;">
+                                        <t t-esc="'%.2f' % doc.total_cheque"/>
+                                    </td>
+                                    <td style="padding:7px;text-align:right;">
+                                        <t t-esc="'%.2f' % doc.total_neft"/>
+                                    </td>
+                                    <td style="padding:7px;text-align:right;color:#1a73e8;">
+                                        Rs
+                                        <t t-esc="'%.2f' % doc.grand_total"/>
+                                    </td>
+                                    <td style="padding:7px;text-align:right;color:#1a73e8;">
+                                        Rs
+                                        <t t-esc="'%.2f' % doc.total_deposited"/>
+                                    </td>
+                                    <td style="padding:7px;text-align:right;color:#1a73e8;">
+                                        Rs
+                                        <t t-esc="'%.2f' % doc.total_cash_in_hand"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

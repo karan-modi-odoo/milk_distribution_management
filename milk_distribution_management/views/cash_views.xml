@@ -17,7 +17,8 @@
                     <group>
                         <group>
                             <field name="date"/>
-                            <field name="collector_id"/>
+                            <field name="collector_id"
+                                   domain="[('milk_is_collector', '=', True)]"/>
                         </group>
                         <group>
                             <field name="total_collected" string="Total Collected (Rs)" readonly="1"/>
@@ -25,9 +26,14 @@
                     </group>
                     <field name="line_ids">
                         <list editable="bottom">
-                            <field name="partner_id" string="Dealer"/>
+                            <field name="partner_id" string="Dealer"
+                                   domain="[('milk_is_dealer', '=', True)]"/>
                             <field name="outstanding" string="Outstanding (Rs)" readonly="1"/>
                             <field name="collected_amount" string="Collected (Rs)"/>
+                            <field name="payment_mode" string="Mode" widget="badge"
+                                   decoration-success="payment_mode == 'upi'"
+                                   decoration-info="payment_mode == 'cash'"
+                                   decoration-warning="payment_mode == 'cheque'"/>
                             <field name="balance_after" string="Balance After (Rs)" readonly="1"/>
                         </list>
                     </field>
@@ -44,7 +50,7 @@
             <list decoration-success="state == 'confirmed'"
                   decoration-warning="state == 'draft'">
                 <field name="date"/>
-                <field name="collector_id"/>
+                <field name="collector_id" domain="[('milk_is_collector', '=', True)]"/>
                 <field name="total_collected" string="Total (Rs)" sum="Grand Total"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'confirmed'"

@@ -1,5 +1,6 @@
 import logging
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -18,12 +19,23 @@ class MilkPartnerLedger(models.Model):
         compute='_compute_closing',
         string='Closing (Rs)',
         digits=(16, 2),
+        store=True,
     )
 
     @api.depends('opening_balance', 'today_bill', 'received_amount')
     def _compute_closing(self):
         for rec in self:
             rec.closing_balance = rec.opening_balance + rec.today_bill - rec.received_amount
+
+    @api.constrains('partner_id', 'date')
+    def _check_unique_partner_date(self):
+        for rec in self:
+            if self.search_count([
+                ('partner_id', '=', rec.partner_id.id),
+                ('date', '=', rec.date),
+                ('id', '!=', rec.id),
+            ]) > 0:
+                raise ValidationError("A ledger entry for this dealer and date already exists.")
 
     # ── Feature 4: Auto Carry Forward ────────────────────────────────────────
     def action_auto_carry_forward(self):

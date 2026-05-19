@@ -67,7 +67,11 @@ class MilkDriverPerformanceLine(models.TransientModel):
     _order = 'total_amount desc'
 
     report_id = fields.Many2one('milk.driver.performance', ondelete='cascade')
-    driver_id = fields.Many2one('res.partner', string='Driver')
+    driver_id = fields.Many2one(
+        'res.partner',
+        string='Driver',
+        domain=[('milk_is_driver', '=', True)],
+    )
     total_sheets = fields.Integer(string='Sheets')
     total_dealers = fields.Integer(string='Dealers Covered')
     total_amount = fields.Float(string='Total Amount (Rs)', digits=(16, 2))

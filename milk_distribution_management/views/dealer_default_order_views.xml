@@ -1,0 +1,125 @@
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dealer.default.order — Form View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dealer_default_order_form" model="ir.ui.view">
+        <field name="name">milk.dealer.default.order.form</field>
+        <field name="model">milk.dealer.default.order</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived"
+                            bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="partner_id" string="Dealer"/>
+                        <h1>
+                            <field name="partner_id"
+                                   placeholder="Select dealer…"
+                                   options="{'no_create': True}"
+                                   domain="[('milk_is_dealer', '=', True)]"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Template Settings">
+                            <field name="route_id"
+                                   options="{'no_create': True}"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+
+                    <separator string="Default Products"/>
+                    <field name="line_ids">
+                        <list editable="bottom" string="Default Products">
+                            <field name="product_id"
+                                   placeholder="Select product…"
+                                   options="{'no_create': True}"/>
+                            <!--
+                                is_piece_based: read-only indicator so the
+                                manager can see which mode each product is in.
+                            -->
+                            <field name="is_piece_based"
+                                   string="Piece-Based"
+                                   readonly="1"
+                                   optional="show"
+                                   widget="boolean"/>
+                            <!--
+                                qty / rate use neutral labels because column
+                                headers are shared across all rows in the list.
+                                Piece-based products: qty = pieces, rate = per piece.
+                                Crate-based products: qty = crates, rate = per crate.
+                            -->
+                            <field name="qty"  string="Default Qty"/>
+                            <field name="rate" string="Rate (Rs)"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dealer.default.order — List View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dealer_default_order_list" model="ir.ui.view">
+        <field name="name">milk.dealer.default.order.list</field>
+        <field name="model">milk.dealer.default.order</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="not active">
+                <field name="partner_id" string="Dealer"/>
+                <field name="route_id"   string="Route"/>
+                <field name="active"     widget="boolean" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dealer.default.order — Search View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dealer_default_order_search" model="ir.ui.view">
+        <field name="name">milk.dealer.default.order.search</field>
+        <field name="model">milk.dealer.default.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id" string="Dealer"/>
+                <field name="route_id"   string="Route"/>
+                <separator/>
+                <filter name="filter_active"   string="Active"
+                        domain="[('active','=',True)]"/>
+                <filter name="filter_archived" string="Archived"
+                        domain="[('active','=',False)]"/>
+                <separator/>
+                <filter name="group_by_route"  string="Route"
+                        context="{'group_by': 'route_id'}"/>
+                <filter name="group_by_dealer" string="Dealer"
+                        context="{'group_by': 'partner_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         Window action
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="action_dealer_default_order" model="ir.actions.act_window">
+        <field name="name">Dealer Default Orders</field>
+        <field name="res_model">milk.dealer.default.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first dealer default order template
+            </p>
+            <p>
+                Templates let you pre-fill a dispatch sheet with the
+                standard products, quantities and rates for every dealer
+                on a given route — just click
+                <strong>Fill from Default Orders</strong>
+                on any draft dispatch sheet.
+            </p>
+        </field>
+    </record>
+
+</odoo>

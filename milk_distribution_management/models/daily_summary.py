@@ -52,11 +52,11 @@ class MilkDailySummary(models.Model):
             for sheet in sheets:
                 dl = sheet.line_ids.filtered(lambda l, pid=partner_id: l.partner_id.id == pid)
                 amount = sum(dl.mapped('total_amount'))
-                if sheet.route == 'rashmi_am':
+                if sheet.route_id.name == 'Rashmi AM':
                     rashmi += amount
-                elif sheet.route == 'giriraj_am':
+                elif sheet.route_id.name == 'Giriraj AM':
                     giriraj += amount
-                elif sheet.route == 'pm':
+                elif sheet.route_id.name == 'PM':
                     pm += amount
 
             ledger = self.env['milk.partner.ledger'].search([

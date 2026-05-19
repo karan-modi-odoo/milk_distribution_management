@@ -1,0 +1,111 @@
+<odoo>
+
+    <record id="view_payment_mode_report_form" model="ir.ui.view">
+        <field name="name">milk.payment.mode.report.form</field>
+        <field name="model">milk.payment.mode.report</field>
+        <field name="arch" type="xml">
+            <form string="Payment Mode Report">
+                <sheet>
+                    <!-- Date range + action buttons -->
+                    <group>
+                        <group string="Date Range">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group string=" ">
+                            <button name="action_generate" type="object"
+                                    string="Generate" class="btn-primary"/>
+                            <button name="action_print" type="object"
+                                    string="Print PDF" class="btn-secondary"
+                                    invisible="not line_ids"/>
+                        </group>
+                    </group>
+
+                    <!-- Grand totals summary bar -->
+                    <group invisible="not line_ids" string="Grand Totals">
+                        <group>
+                            <field name="total_cash" readonly="1"/>
+                            <field name="total_upi" readonly="1"/>
+                            <field name="total_cheque" readonly="1"/>
+                            <field name="total_neft" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="grand_total" readonly="1"/>
+                            <field name="total_deposited" readonly="1"/>
+                            <field name="total_cash_in_hand" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook invisible="not line_ids">
+
+                        <!-- Tab 1: Mode-wise Summary -->
+                        <page string="Mode Summary" name="mode_summary">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="payment_mode"
+                                           string="Payment Mode"
+                                           widget="badge"
+                                           decoration-info="payment_mode == 'cash'"
+                                           decoration-success="payment_mode == 'upi'"
+                                           decoration-warning="payment_mode == 'cheque'"
+                                           decoration-primary="payment_mode == 'neft'"/>
+                                    <field name="txn_count" string="Transactions"/>
+                                    <field name="total_amount"
+                                           string="Total Collected (Rs)"
+                                           sum="Grand Total"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- Tab 2: Daily Reconciliation -->
+                        <page string="Daily Reconciliation" name="daily_recon">
+                            <field name="daily_ids" readonly="1">
+                                <list decoration-danger="cash_in_hand &lt; 0">
+                                    <field name="date" string="Date"/>
+                                    <field name="cash_collected"
+                                           string="Cash (Rs)"
+                                           sum="Total"/>
+                                    <field name="upi_collected"
+                                           string="UPI (Rs)"
+                                           sum="Total"/>
+                                    <field name="cheque_collected"
+                                           string="Cheque (Rs)"
+                                           sum="Total"/>
+                                    <field name="neft_collected"
+                                           string="NEFT/RTGS (Rs)"
+                                           sum="Total"/>
+                                    <field name="total_collected"
+                                           string="Total Collected (Rs)"
+                                           sum="Total"/>
+                                    <field name="bank_deposited"
+                                           string="Bank Deposited (Rs)"
+                                           sum="Total"/>
+                                    <field name="cash_in_hand"
+                                           string="Cash in Hand (Rs)"
+                                           sum="Total"/>
+                                </list>
+                            </field>
+                            <div class="alert alert-info mt-2" role="alert"
+                                 invisible="not daily_ids">
+                                <strong>Cash in Hand</strong>
+                                = Cash collected on that day
+                                minus bank deposits confirmed on that day.
+                                Rows in red indicate a negative balance
+                                (deposited more than collected in cash).
+                            </div>
+                        </page>
+
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_payment_mode_report" model="ir.actions.act_window">
+        <field name="name">Payment Mode Report</field>
+        <field name="res_model">milk.payment.mode.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

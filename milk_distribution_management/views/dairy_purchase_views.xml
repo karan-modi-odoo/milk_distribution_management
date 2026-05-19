@@ -1,0 +1,99 @@
+<odoo>
+
+    <!-- ── Dairy Purchase Bill ──────────────────────────────────────────── -->
+
+    <record id="view_dairy_purchase_form" model="ir.ui.view">
+        <field name="name">milk.dairy.purchase.form</field>
+        <field name="model">milk.dairy.purchase</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object"
+                            string="Confirm Bill" class="btn-primary"
+                            invisible="state == 'confirmed'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <!-- ── Smart buttons ──────────────────────────────── -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_picking" type="object"
+                                class="oe_stat_button" icon="fa-truck"
+                                invisible="not picking_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Stock</span>
+                                <span class="o_stat_text">Receipt</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Bill Details">
+                            <field name="date"/>
+                            <field name="dairy_name"/>
+                            <field name="vehicle_no"/>
+                            <field name="driver_name"/>
+                            <!-- Stock receipt reference shown after confirm -->
+                            <field name="picking_id" readonly="1"
+                                   invisible="not picking_id"
+                                   string="Stock Receipt"/>
+                        </group>
+                        <group string="Reconciliation">
+                            <field name="total_amount"      readonly="1"/>
+                            <field name="dispatched_amount" readonly="1"/>
+                            <field name="difference"        readonly="1"
+                                   decoration-danger="difference != 0"
+                                   decoration-success="difference == 0"
+                                   widget="monetary"/>
+                            <field name="reconciled" readonly="1"
+                                   widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="qty"    string="Qty / Crates"/>
+                            <field name="rate"   string="Rate (Rs)"/>
+                            <field name="amount" string="Amount (Rs)" readonly="1"/>
+                        </list>
+                    </field>
+                    <group class="oe_subtotal_footer">
+                        <field name="total_qty"    string="Total Qty"    readonly="1"/>
+                        <field name="total_amount" string="Total Amount" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_dairy_purchase_list" model="ir.ui.view">
+        <field name="name">milk.dairy.purchase.list</field>
+        <field name="model">milk.dairy.purchase</field>
+        <field name="arch" type="xml">
+            <list decoration-success="reconciled == True"
+                  decoration-danger="reconciled == False and state == 'confirmed'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="dairy_name"/>
+                <field name="total_amount"      string="Bill Amt (Rs)"       sum="Total"/>
+                <field name="dispatched_amount" string="Dispatched Amt (Rs)" sum="Total"/>
+                <field name="difference"        string="Diff (Rs)"           sum="Total"/>
+                <field name="reconciled" widget="boolean"/>
+                <field name="picking_id" string="Receipt" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_dairy_purchase" model="ir.actions.act_window">
+        <field name="name">Dairy Purchase Bills</field>
+        <field name="res_model">milk.dairy.purchase</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

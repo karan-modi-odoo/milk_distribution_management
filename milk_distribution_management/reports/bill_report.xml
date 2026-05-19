@@ -12,35 +12,78 @@
     <template id="report_bill">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
-                <t t-foreach="doc.line_ids" t-as="line">
-                    <t t-if="line.total_amount &gt; 0">
-                        <t t-call="web.external_layout">
-                            <div class="page">
-                                <div style="border-bottom:3px solid #1a73e8;padding-bottom:10px;margin-bottom:16px;">
+
+                <!--
+                    One external_layout per dispatch sheet (= one route).
+                    All dealer bills for this sheet are rendered inside a
+                    single page set. A CSS page-break is inserted between
+                    dealers so each dealer still starts on a fresh page,
+                    but the PDF header/footer (company logo, address) is
+                    shared across the whole sheet instead of repeating the
+                    full layout wrapper for every dealer.
+                -->
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!--
+                            Collect only lines with a positive amount so the
+                            page-break logic (last item = no break) works on
+                            the filtered set, not the raw line_ids.
+                        -->
+                        <t t-set="billable_lines"
+                           t-value="doc.line_ids.filtered(lambda l: l.total_amount > 0)"/>
+
+                        <t t-foreach="billable_lines" t-as="line">
+
+                            <!--
+                                Insert a page-break before every dealer block
+                                except the very first one. This keeps all
+                                dealers inside one external_layout while still
+                                giving each dealer its own printed page.
+                            -->
+                            <div t-att-style="'' if line_index == 0 else 'page-break-before: always;'">
+
+                                <!-- ── Bill header ──────────────────────── -->
+                                <div style="border-bottom:3px solid #1a73e8;
+                                            padding-bottom:10px;
+                                            margin-bottom:16px;">
                                     <h2 style="color:#1a73e8;margin:0;">MILK BILL</h2>
                                     <span style="font-size:13px;">
-                                        Ref: <strong><t t-esc="doc.name"/></strong>
+                                        Ref:
+                                        <strong>
+                                            <t t-esc="doc.name"/>
+                                        </strong>
                                         &amp;nbsp;|&amp;nbsp;
-                                        Date: <t t-esc="doc.date"/>
+                                        Date:
+                                        <t t-esc="doc.date"/>
                                         &amp;nbsp;|&amp;nbsp;
                                         Route:
-                                        <t t-if="doc.route == 'rashmi_am'">Rashmi AM</t>
-                                        <t t-elif="doc.route == 'giriraj_am'">Giriraj AM</t>
-                                        <t t-elif="doc.route == 'pm'">PM</t>
+                                        <t t-esc="doc.route_id.name or ''"/>
                                     </span>
                                 </div>
-                                <div style="background:#f4f8ff;padding:10px;border-radius:4px;margin-bottom:16px;">
-                                    <strong>Dealer: <t t-esc="line.partner_id.name"/></strong>
-                                    <t t-if="line.partner_id.mobile">
+
+                                <!-- ── Dealer info ──────────────────────── -->
+                                <div style="background:#f4f8ff;
+                                            padding:10px;
+                                            border-radius:4px;
+                                            margin-bottom:16px;">
+                                    <strong>Dealer:
+                                        <t t-esc="line.partner_id.name"/>
+                                    </strong>
+                                    <t t-if="line.partner_id.phone">
                                         &amp;nbsp;|&amp;nbsp;
-                                        <t t-esc="line.partner_id.mobile"/>
+                                        <t t-esc="line.partner_id.phone"/>
                                     </t>
                                 </div>
-                                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+
+                                <!-- ── Product table ────────────────────── -->
+                                <table style="width:100%;
+                                              border-collapse:collapse;
+                                              font-size:13px;">
                                     <thead>
                                         <tr style="background:#1a73e8;color:white;">
                                             <th style="padding:8px;text-align:left;">Product</th>
-                                            <th style="padding:8px;text-align:center;">Qty/Crates</th>
+                                            <th style="padding:8px;text-align:center;">Qty</th>
                                             <th style="padding:8px;text-align:right;">Rate (Rs)</th>
                                             <th style="padding:8px;text-align:right;">Amount (Rs)</th>
                                         </tr>
@@ -49,32 +92,60 @@
                                         <t t-foreach="line.product_line_ids" t-as="pl">
                                             <t t-if="pl.qty &gt; 0">
                                                 <tr style="border-bottom:1px solid #eee;">
-                                                    <td style="padding:7px 8px;"><t t-esc="pl.product_id.name"/></td>
-                                                    <td style="padding:7px 8px;text-align:center;"><t t-esc="pl.qty"/></td>
-                                                    <td style="padding:7px 8px;text-align:right;"><t t-esc="pl.rate"/></td>
-                                                    <td style="padding:7px 8px;text-align:right;"><t t-esc="'%.2f' % pl.amount"/></td>
+                                                    <td style="padding:7px 8px;">
+                                                        <t t-esc="pl.product_id.name"/>
+                                                    </td>
+                                                    <td style="padding:7px 8px;text-align:center;">
+                                                        <t t-esc="pl.qty"/>
+                                                        <!-- Show unit label so the recipient knows the basis -->
+                                                        <t t-if="pl.is_piece_based">
+                                                            <small style="color:#888;"> pcs</small>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <small style="color:#888;"> crates</small>
+                                                        </t>
+                                                    </td>
+                                                    <td style="padding:7px 8px;text-align:right;">
+                                                        <t t-esc="pl.rate"/>
+                                                    </td>
+                                                    <td style="padding:7px 8px;text-align:right;">
+                                                        <t t-esc="'%.2f' % pl.amount"/>
+                                                    </td>
                                                 </tr>
                                             </t>
                                         </t>
                                     </tbody>
                                     <tfoot>
                                         <tr style="background:#e8f0fe;font-weight:bold;">
-                                            <td colspan="3" style="padding:8px;text-align:right;">Total</td>
-                                            <td style="padding:8px;text-align:right;color:#1a73e8;">
-                                                Rs <t t-esc="'%.2f' % line.total_amount"/>
+                                            <td colspan="3"
+                                                style="padding:8px;text-align:right;">Total
+                                            </td>
+                                            <td style="padding:8px;
+                                                        text-align:right;
+                                                        color:#1a73e8;">
+                                                Rs
+                                                <t t-esc="'%.2f' % line.total_amount"/>
                                             </td>
                                         </tr>
                                     </tfoot>
                                 </table>
-                                <p style="margin-top:24px;font-size:11px;color:#888;text-align:center;">
+
+                                <p style="margin-top:24px;
+                                          font-size:11px;
+                                          color:#888;
+                                          text-align:center;">
                                     Thank you for your business. Please make payment promptly.
                                 </p>
-                            </div>
-                        </t>
-                    </t>
-                </t>
-            </t>
-        </t>
+
+                            </div><!-- end dealer block -->
+
+                        </t><!-- end t-foreach billable_lines -->
+
+                    </div><!-- end .page -->
+                </t><!-- end web.external_layout -->
+
+            </t><!-- end t-foreach docs -->
+        </t><!-- end web.html_container -->
     </template>
 
 </odoo>

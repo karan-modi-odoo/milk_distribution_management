@@ -8,7 +8,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="partner_id" string="Dealer"/>
+                            <field name="partner_id" string="Dealer" domain="[('milk_is_dealer', '=', True)]"/>
                             <field name="date_from" string="From Date"/>
                             <field name="date_to" string="To Date"/>
                         </group>

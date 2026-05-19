@@ -27,7 +27,7 @@ class MilkProductSalesReport(models.TransientModel):
         sheets = self.env['milk.dispatch.sheet'].search([
             ('date', '>=', self.date_from),
             ('date', '<=', self.date_to),
-            ('state', '=', 'confirmed'),
+            ('state', 'in', ('confirmed', 'delivered')),
         ])
 
         product_data = {}

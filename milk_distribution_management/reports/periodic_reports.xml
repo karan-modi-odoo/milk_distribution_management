@@ -1,0 +1,376 @@
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         ir.actions.report registrations
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="action_report_periodic_crate_order" model="ir.actions.report">
+        <field name="name">Dairy Crate Order Report (Periodic)</field>
+        <field name="model">milk.periodic.crate.order.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_periodic_crate_order</field>
+    </record>
+
+    <record id="action_report_periodic_dealer_crate" model="ir.actions.report">
+        <field name="name">Dealer Crate Usage Report (Periodic)</field>
+        <field name="model">milk.periodic.dealer.crate.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_periodic_dealer_crate</field>
+    </record>
+
+    <record id="action_report_periodic_ledger" model="ir.actions.report">
+        <field name="name">Periodic Ledger Report</field>
+        <field name="model">milk.periodic.ledger.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_periodic_ledger</field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         QWeb Templates
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- ── 1. Dairy Crate Order Report ──────────────────────────────────── -->
+    <template id="report_periodic_crate_order">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family:Arial,sans-serif;font-size:10px;">
+
+                        <!-- Header -->
+                        <div style="border-bottom:3px solid #1a237e;padding-bottom:8px;margin-bottom:14px;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <tr>
+                                    <td>
+                                        <div style="font-size:16px;font-weight:bold;color:#1a237e;">
+                                            DAIRY CRATE ORDER REPORT
+                                        </div>
+                                        <div style="font-size:11px;color:#555;margin-top:2px;">
+                                            Period: <strong><t t-esc="doc.period_label"/></strong>
+                                            &#160;|&#160;
+                                            <t t-esc="doc.date_from.strftime('%d-%m-%Y')"/>
+                                            &#160;to&#160;
+                                            <t t-esc="doc.date_to.strftime('%d-%m-%Y')"/>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right;font-size:10px;color:#555;">
+                                        <t t-esc="company.name"/><br/>
+                                        Orders: <strong><t t-esc="doc.order_count"/></strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Data table -->
+                        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+                            <thead>
+                                <tr style="background:#1a237e;color:white;">
+                                    <th style="padding:6px 8px;text-align:left;border:1px solid #3949ab;">#</th>
+                                    <th style="padding:6px 8px;text-align:left;border:1px solid #3949ab;">Product</th>
+                                    <th style="padding:6px 8px;text-align:center;border:1px solid #3949ab;">Orders</th>
+                                    <th style="padding:6px 8px;text-align:right;border:1px solid #3949ab;">Total Crates</th>
+                                    <th style="padding:6px 8px;text-align:right;border:1px solid #3949ab;background:#0d47a1;">Amount (Rs)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr t-attf-style="background:{{ 'white' if line_index % 2 == 0 else '#e8eaf6' }};border-bottom:1px solid #c5cae9;">
+                                        <td style="padding:5px 8px;border:1px solid #c5cae9;color:#777;">
+                                            <t t-esc="line_index + 1"/>
+                                        </td>
+                                        <td style="padding:5px 8px;border:1px solid #c5cae9;font-weight:bold;">
+                                            <t t-esc="line.product_id.display_name"/>
+                                        </td>
+                                        <td style="padding:5px 8px;text-align:center;border:1px solid #c5cae9;">
+                                            <t t-esc="line.order_count"/>
+                                        </td>
+                                        <td style="padding:5px 8px;text-align:right;border:1px solid #c5cae9;">
+                                            <t t-esc="'%.2f' % line.total_qty"/>
+                                        </td>
+                                        <td style="padding:5px 8px;text-align:right;border:1px solid #c5cae9;font-weight:bold;color:#1a237e;">
+                                            <t t-esc="'%.2f' % line.total_amount"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#1a237e;color:white;font-weight:bold;">
+                                    <td colspan="3" style="padding:6px 8px;border:1px solid #3949ab;">TOTAL</td>
+                                    <td style="padding:6px 8px;text-align:right;border:1px solid #3949ab;">
+                                        <t t-esc="'%.2f' % doc.total_ordered_qty"/>
+                                    </td>
+                                    <td style="padding:6px 8px;text-align:right;border:1px solid #3949ab;background:#0d47a1;">
+                                        Rs <t t-esc="'%.2f' % doc.total_ordered_amount"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Footer note -->
+                        <div style="margin-top:20px;font-size:9px;color:#777;border-top:1px solid #eee;padding-top:6px;">
+                            Generated on <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d-%m-%Y %H:%M')"/>
+                            &#160;|&#160; Only Sent / Fulfilled Dairy Orders are included.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ── 2. Dealer-wise Crate Usage Report ────────────────────────────── -->
+    <template id="report_periodic_dealer_crate">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family:Arial,sans-serif;font-size:10px;">
+
+                        <!-- Header -->
+                        <div style="border-bottom:3px solid #2e7d32;padding-bottom:8px;margin-bottom:14px;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <tr>
+                                    <td>
+                                        <div style="font-size:16px;font-weight:bold;color:#2e7d32;">
+                                            DEALER-WISE CRATE USAGE REPORT
+                                        </div>
+                                        <div style="font-size:11px;color:#555;margin-top:2px;">
+                                            Period: <strong><t t-esc="doc.period_label"/></strong>
+                                            &#160;|&#160;
+                                            <t t-esc="doc.date_from.strftime('%d-%m-%Y')"/>
+                                            &#160;to&#160;
+                                            <t t-esc="doc.date_to.strftime('%d-%m-%Y')"/>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right;font-size:10px;color:#555;">
+                                        <t t-esc="company.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Data table -->
+                        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+                            <thead>
+                                <tr style="background:#2e7d32;color:white;">
+                                    <th style="padding:6px 8px;text-align:left;border:1px solid #388e3c;">#</th>
+                                    <th style="padding:6px 8px;text-align:left;border:1px solid #388e3c;">Dealer</th>
+                                    <th style="padding:6px 8px;text-align:center;border:1px solid #388e3c;">Opening</th>
+                                    <th style="padding:6px 8px;text-align:center;border:1px solid #388e3c;">Issued</th>
+                                    <th style="padding:6px 8px;text-align:center;border:1px solid #388e3c;">Returned</th>
+                                    <th style="padding:6px 8px;text-align:center;border:1px solid #1b5e20;background:#1b5e20;">Closing</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr t-attf-style="background:{{ 'white' if line_index % 2 == 0 else '#e8f5e9' }};border-bottom:1px solid #c8e6c9;">
+                                        <td style="padding:5px 8px;border:1px solid #c8e6c9;color:#777;">
+                                            <t t-esc="line_index + 1"/>
+                                        </td>
+                                        <td style="padding:5px 8px;border:1px solid #c8e6c9;font-weight:bold;">
+                                            <t t-esc="line.partner_id.name"/>
+                                        </td>
+                                        <td style="padding:5px 8px;text-align:center;border:1px solid #c8e6c9;">
+                                            <t t-esc="line.opening"/>
+                                        </td>
+                                        <td style="padding:5px 8px;text-align:center;border:1px solid #c8e6c9;color:#1a237e;font-weight:bold;">
+                                            <t t-esc="line.issued"/>
+                                        </td>
+                                        <td style="padding:5px 8px;text-align:center;border:1px solid #c8e6c9;color:#e65100;">
+                                            <t t-esc="line.returned"/>
+                                        </td>
+                                        <td t-attf-style="padding:5px 8px;text-align:center;border:1px solid #c8e6c9;font-weight:bold;color:{{ '#c62828' if line.closing > 0 else '#2e7d32' }};">
+                                            <t t-esc="line.closing"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#2e7d32;color:white;font-weight:bold;">
+                                    <td colspan="2" style="padding:6px 8px;border:1px solid #388e3c;">TOTAL</td>
+                                    <td style="padding:6px 8px;text-align:center;border:1px solid #388e3c;"></td>
+                                    <td style="padding:6px 8px;text-align:center;border:1px solid #388e3c;">
+                                        <t t-esc="doc.total_issued"/>
+                                    </td>
+                                    <td style="padding:6px 8px;text-align:center;border:1px solid #388e3c;">
+                                        <t t-esc="doc.total_returned"/>
+                                    </td>
+                                    <td style="padding:6px 8px;text-align:center;border:1px solid #388e3c;background:#1b5e20;">
+                                        <t t-esc="doc.total_net_crates"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div style="margin-top:20px;font-size:9px;color:#777;border-top:1px solid #eee;padding-top:6px;">
+                            Generated on <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d-%m-%Y %H:%M')"/>
+                            &#160;|&#160; Only confirmed crate transactions included.
+                            &#160;|&#160; Closing = Opening + Issued − Returned.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- ── 3. Periodic Ledger Report ────────────────────────────────────── -->
+    <template id="report_periodic_ledger">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family:Arial,sans-serif;font-size:9px;">
+
+                        <!-- Header -->
+                        <div style="border-bottom:3px solid #4a148c;padding-bottom:8px;margin-bottom:14px;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <tr>
+                                    <td>
+                                        <div style="font-size:15px;font-weight:bold;color:#4a148c;">
+                                            PERIODIC LEDGER REPORT
+                                        </div>
+                                        <div style="font-size:10px;color:#555;margin-top:2px;">
+                                            Period: <strong><t t-esc="doc.period_label"/></strong>
+                                            &#160;|&#160;
+                                            <t t-esc="doc.date_from.strftime('%d-%m-%Y')"/>
+                                            &#160;to&#160;
+                                            <t t-esc="doc.date_to.strftime('%d-%m-%Y')"/>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right;font-size:10px;color:#555;">
+                                        <t t-esc="company.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Period summary box -->
+                        <table style="width:100%;border-collapse:collapse;margin-bottom:14px;font-size:9px;background:#f3e5f5;">
+                            <tr>
+                                <td style="padding:5px 10px;border:1px solid #ce93d8;">
+                                    <strong>Total Billed:</strong><br/>
+                                    Rs <t t-esc="'%.2f' % doc.grand_total_billed"/>
+                                </td>
+                                <td style="padding:5px 10px;border:1px solid #ce93d8;">
+                                    <strong>Total Paid:</strong><br/>
+                                    Rs <t t-esc="'%.2f' % doc.grand_total_paid"/>
+                                </td>
+                                <td style="padding:5px 10px;border:1px solid #ce93d8;font-weight:bold;color:#4a148c;">
+                                    <strong>Closing Balance:</strong><br/>
+                                    Rs <t t-esc="'%.2f' % doc.grand_closing_cash"/>
+                                </td>
+                                <td style="padding:5px 10px;border:1px solid #ce93d8;">
+                                    <strong>Crates Issued:</strong><br/>
+                                    <t t-esc="doc.grand_issued_crates"/>
+                                </td>
+                                <td style="padding:5px 10px;border:1px solid #ce93d8;">
+                                    <strong>Crates Returned:</strong><br/>
+                                    <t t-esc="doc.grand_returned_crates"/>
+                                </td>
+                                <td style="padding:5px 10px;border:1px solid #ce93d8;font-weight:bold;color:#4a148c;">
+                                    <strong>Net Crates:</strong><br/>
+                                    <t t-esc="doc.grand_closing_crates"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Dealer breakdown table -->
+                        <table style="width:100%;border-collapse:collapse;font-size:8.5px;">
+                            <thead>
+                                <tr style="background:#4a148c;color:white;">
+                                    <th rowspan="2" style="padding:4px 6px;text-align:left;border:1px solid #6a1b9a;vertical-align:bottom;">#</th>
+                                    <th rowspan="2" style="padding:4px 6px;text-align:left;border:1px solid #6a1b9a;vertical-align:bottom;">Dealer</th>
+                                    <!-- Cash block -->
+                                    <th colspan="4" style="padding:4px 6px;text-align:center;border:1px solid #6a1b9a;background:#311b92;">
+                                        CASH LEDGER (Rs)
+                                    </th>
+                                    <!-- Crate block -->
+                                    <th colspan="4" style="padding:4px 6px;text-align:center;border:1px solid #6a1b9a;background:#1b5e20;">
+                                        CRATE LEDGER
+                                    </th>
+                                </tr>
+                                <tr style="background:#6a1b9a;color:white;font-size:8px;">
+                                    <th style="padding:3px 6px;border:1px solid #8e24aa;">Opening</th>
+                                    <th style="padding:3px 6px;border:1px solid #8e24aa;">Billed</th>
+                                    <th style="padding:3px 6px;border:1px solid #8e24aa;">Paid</th>
+                                    <th style="padding:3px 6px;border:1px solid #8e24aa;background:#311b92;">Balance</th>
+                                    <th style="padding:3px 6px;border:1px solid #2e7d32;background:#1b5e20;">Opening</th>
+                                    <th style="padding:3px 6px;border:1px solid #2e7d32;background:#1b5e20;">Issued</th>
+                                    <th style="padding:3px 6px;border:1px solid #2e7d32;background:#1b5e20;">Returned</th>
+                                    <th style="padding:3px 6px;border:1px solid #2e7d32;background:#1b5e20;">Net</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr t-attf-style="background:{{ 'white' if line_index % 2 == 0 else '#f3e5f5' }};border-bottom:1px solid #e1bee7;">
+                                        <td style="padding:4px 6px;border:1px solid #e1bee7;color:#999;">
+                                            <t t-esc="line_index + 1"/>
+                                        </td>
+                                        <td style="padding:4px 6px;border:1px solid #e1bee7;font-weight:bold;">
+                                            <t t-esc="line.partner_id.name"/>
+                                        </td>
+                                        <!-- Cash -->
+                                        <td style="padding:4px 6px;text-align:right;border:1px solid #e1bee7;">
+                                            <t t-esc="'%.2f' % line.opening_balance"/>
+                                        </td>
+                                        <td style="padding:4px 6px;text-align:right;border:1px solid #e1bee7;">
+                                            <t t-esc="'%.2f' % line.total_billed"/>
+                                        </td>
+                                        <td style="padding:4px 6px;text-align:right;border:1px solid #e1bee7;color:#2e7d32;">
+                                            <t t-esc="'%.2f' % line.total_paid"/>
+                                        </td>
+                                        <td t-attf-style="padding:4px 6px;text-align:right;border:1px solid #e1bee7;font-weight:bold;color:{{ '#c62828' if line.closing_balance > 0 else '#2e7d32' }};">
+                                            <t t-esc="'%.2f' % line.closing_balance"/>
+                                        </td>
+                                        <!-- Crates -->
+                                        <td style="padding:4px 6px;text-align:center;border:1px solid #e1bee7;">
+                                            <t t-esc="line.opening_crates"/>
+                                        </td>
+                                        <td style="padding:4px 6px;text-align:center;border:1px solid #e1bee7;color:#1a237e;">
+                                            <t t-esc="line.issued_crates"/>
+                                        </td>
+                                        <td style="padding:4px 6px;text-align:center;border:1px solid #e1bee7;color:#e65100;">
+                                            <t t-esc="line.returned_crates"/>
+                                        </td>
+                                        <td t-attf-style="padding:4px 6px;text-align:center;border:1px solid #e1bee7;font-weight:bold;color:{{ '#c62828' if line.closing_crates > 0 else '#2e7d32' }};">
+                                            <t t-esc="line.closing_crates"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#4a148c;color:white;font-weight:bold;font-size:9px;">
+                                    <td colspan="2" style="padding:5px 6px;border:1px solid #6a1b9a;">TOTAL</td>
+                                    <td style="padding:5px 6px;border:1px solid #6a1b9a;"></td>
+                                    <td style="padding:5px 6px;text-align:right;border:1px solid #6a1b9a;">
+                                        <t t-esc="'%.2f' % doc.grand_total_billed"/>
+                                    </td>
+                                    <td style="padding:5px 6px;text-align:right;border:1px solid #6a1b9a;">
+                                        <t t-esc="'%.2f' % doc.grand_total_paid"/>
+                                    </td>
+                                    <td style="padding:5px 6px;text-align:right;border:1px solid #6a1b9a;background:#311b92;">
+                                        <t t-esc="'%.2f' % doc.grand_closing_cash"/>
+                                    </td>
+                                    <td style="padding:5px 6px;border:1px solid #6a1b9a;"></td>
+                                    <td style="padding:5px 6px;text-align:center;border:1px solid #6a1b9a;background:#1b5e20;">
+                                        <t t-esc="doc.grand_issued_crates"/>
+                                    </td>
+                                    <td style="padding:5px 6px;text-align:center;border:1px solid #6a1b9a;background:#1b5e20;">
+                                        <t t-esc="doc.grand_returned_crates"/>
+                                    </td>
+                                    <td style="padding:5px 6px;text-align:center;border:1px solid #6a1b9a;background:#1b5e20;">
+                                        <t t-esc="doc.grand_closing_crates"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div style="margin-top:16px;font-size:8px;color:#777;border-top:1px solid #eee;padding-top:6px;">
+                            Generated on <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d-%m-%Y %H:%M')"/>
+                            &#160;|&#160; Cash Balance = Opening + Billed − Paid.
+                            &#160;|&#160; Net Crates = Opening + Issued − Returned.
+                            &#160;|&#160; Red = outstanding balance / crates still held by dealer.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

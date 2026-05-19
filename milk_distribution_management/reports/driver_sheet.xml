@@ -9,70 +9,199 @@
         <field name="binding_type">report</field>
     </record>
 
+    <!--
+        CHANGE: Template now iterates route_keys (one page per route) instead of
+        iterating docs (one page per dispatch sheet).
+        All dealers belonging to the same route appear on a SINGLE page/section.
+        No business logic or workflow changed — only the grouping loop.
+    -->
     <template id="report_driver">
         <t t-call="web.html_container">
-            <t t-foreach="docs" t-as="doc">
+            <t t-foreach="route_keys" t-as="rid">
+                <t t-set="rdata" t-value="report_data[rid]"/>
                 <t t-call="web.external_layout">
-                    <div class="page">
-                        <div style="border-bottom:3px solid #2e7d32;padding-bottom:10px;margin-bottom:16px;">
-                            <h2 style="color:#2e7d32;margin:0;">DRIVER DELIVERY SHEET</h2>
-                            <span style="font-size:13px;">
-                                Ref: <strong><t t-esc="doc.name"/></strong>
-                                &amp;nbsp;|&amp;nbsp;
-                                Date: <t t-esc="doc.date"/>
-                                &amp;nbsp;|&amp;nbsp;
-                                Driver: <t t-esc="doc.driver_id.name or ''"/>
-                                &amp;nbsp;|&amp;nbsp;
-                                Route:
-                                <t t-if="doc.route == 'rashmi_am'">Rashmi AM</t>
-                                <t t-elif="doc.route == 'giriraj_am'">Giriraj AM</t>
-                                <t t-elif="doc.route == 'pm'">PM</t>
-                            </span>
+                    <div class="page" style="font-family:Arial,sans-serif;font-size:9px;">
+
+                        <!-- ── Header ───────────────────────────────────────── -->
+                        <div style="border-bottom:2px solid #1a237e;padding-bottom:6px;margin-bottom:8px;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <tr>
+                                    <td style="font-size:13px;font-weight:bold;color:#1a237e;">
+                                        DRIVER DELIVERY SHEET
+                                    </td>
+                                    <td style="text-align:right;font-size:9px;color:#555;">
+                                        <strong>Ref:</strong>
+                                        <t t-esc="rdata['ref']"/>
+                                        &#160;|&#160;
+                                        <strong>Date:</strong>
+                                        <t t-esc="rdata['date'].strftime('%d-%m-%Y')"/>
+                                        &#160;|&#160;
+                                        <strong>Driver:</strong>
+                                        <t t-esc="rdata['driver'].name if rdata['driver'] else '-'"/>
+                                        &#160;|&#160;
+                                        <strong>Route:</strong>
+                                        <t t-esc="rdata['route'].name if rdata['route'] else '-'"/>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
-                        <t t-foreach="doc.line_ids" t-as="line">
-                            <t t-if="line.total_amount &gt; 0">
-                                <div style="margin-bottom:16px;page-break-inside:avoid;">
-                                    <div style="background:#e8f5e9;border-left:5px solid #2e7d32;padding:6px 12px;margin-bottom:4px;">
-                                        <strong><t t-esc="line_index + 1"/>. <t t-esc="line.partner_id.name"/></strong>
-                                    </div>
-                                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                                        <thead>
-                                            <tr style="background:#2e7d32;color:white;">
-                                                <th style="padding:5px 8px;text-align:left;">Product</th>
-                                                <th style="padding:5px 8px;text-align:center;">Qty/Crates</th>
-                                                <th style="padding:5px 8px;text-align:right;">Amount (Rs)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <t t-foreach="line.product_line_ids" t-as="pl">
-                                                <t t-if="pl.qty &gt; 0">
-                                                    <tr style="border-bottom:1px solid #eee;">
-                                                        <td style="padding:5px 8px;"><t t-esc="pl.product_id.name"/></td>
-                                                        <td style="padding:5px 8px;text-align:center;font-weight:bold;"><t t-esc="pl.qty"/></td>
-                                                        <td style="padding:5px 8px;text-align:right;"><t t-esc="'%.2f' % pl.amount"/></td>
-                                                    </tr>
-                                                </t>
+
+                        <!-- ── Section A: Regular products ──────────────────── -->
+                        <t t-if="rdata['regular_products']">
+                            <table style="width:100%;border-collapse:collapse;font-size:8px;">
+                                <thead>
+                                    <tr style="background:#1a237e;color:white;">
+                                        <th style="padding:3px 4px;text-align:left;border:1px solid #3949ab;min-width:80px;">
+                                            Dealer
+                                        </th>
+                                        <t t-foreach="rdata['regular_products']" t-as="prod">
+                                            <th style="padding:3px 4px;text-align:center;border:1px solid #3949ab;white-space:nowrap;max-width:38px;overflow:hidden;">
+                                                <t t-esc="prod['short_name']"/>
+                                            </th>
+                                        </t>
+                                        <th style="padding:3px 4px;text-align:right;border:1px solid #3949ab;background:#0d47a1;">
+                                            Total (Rs)
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="rdata['regular_rows']" t-as="row">
+                                        <tr t-attf-style="background:{{ 'white' if row_index % 2 == 0 else '#e8eaf6' }};border-bottom:1px solid #c5cae9;">
+                                            <td style="padding:3px 4px;border:1px solid #c5cae9;font-weight:bold;">
+                                                <t t-esc="row['dealer_name']"/>
+                                            </td>
+                                            <t t-foreach="row['qtys']" t-as="qty">
+                                                <td style="padding:3px 4px;text-align:center;border:1px solid #c5cae9;">
+                                                    <t t-if="qty">
+                                                        <t t-esc="qty % 1 == 0 and int(qty) or qty"/>
+                                                    </t>
+                                                    <t t-else=""/>
+                                                </td>
                                             </t>
-                                        </tbody>
-                                        <tfoot>
-                                            <tr style="background:#e8f5e9;font-weight:bold;">
-                                                <td colspan="2" style="padding:5px 8px;text-align:right;">Shop Total</td>
-                                                <td style="padding:5px 8px;text-align:right;">Rs <t t-esc="'%.2f' % line.total_amount"/></td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>
-                            </t>
+                                            <td style="padding:3px 4px;text-align:right;border:1px solid #c5cae9;font-weight:bold;color:#1a237e;">
+                                                <t t-esc="'%.2f' % row['total']"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background:#1a237e;color:white;font-weight:bold;">
+                                        <td style="padding:3px 4px;border:1px solid #3949ab;">
+                                            TOTAL
+                                        </td>
+                                        <t t-foreach="rdata['regular_col_totals']" t-as="ct">
+                                            <td style="padding:3px 4px;text-align:center;border:1px solid #3949ab;">
+                                                <t t-if="ct">
+                                                    <t t-esc="ct % 1 == 0 and int(ct) or ct"/>
+                                                </t>
+                                                <t t-else="">-</t>
+                                            </td>
+                                        </t>
+                                        <td style="padding:3px 4px;text-align:right;border:1px solid #3949ab;background:#0d47a1;">
+                                            <t t-esc="'%.2f' % rdata['regular_grand_total']"/>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </t>
-                        <div style="border-top:3px solid #2e7d32;padding-top:10px;text-align:right;margin-top:16px;">
-                            <strong style="font-size:15px;color:#2e7d32;">
-                                Grand Total: Rs <t t-esc="'%.2f' % sum(doc.line_ids.mapped('total_amount'))"/>
-                            </strong>
+
+                        <!-- ── Section B: Box products ───────────────────────── -->
+                        <t t-if="rdata['box_products']">
+                            <div style="margin-top:14px;">
+                                <div style="background:#e65100;color:white;padding:3px 8px;font-weight:bold;font-size:9px;margin-bottom:4px;">
+                                    BOX PRODUCTS
+                                </div>
+                                <table style="width:100%;border-collapse:collapse;font-size:8px;">
+                                    <thead>
+                                        <tr style="background:#bf360c;color:white;">
+                                            <th style="padding:3px 4px;text-align:left;border:1px solid #e64a19;min-width:80px;">
+                                                Dealer
+                                            </th>
+                                            <t t-foreach="rdata['box_products']" t-as="prod">
+                                                <th style="padding:3px 4px;text-align:center;border:1px solid #e64a19;white-space:nowrap;max-width:38px;overflow:hidden;">
+                                                    <t t-esc="prod['short_name']"/>
+                                                </th>
+                                            </t>
+                                            <th style="padding:3px 4px;text-align:right;border:1px solid #e64a19;background:#7f0000;">
+                                                Box Total
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="rdata['box_rows']" t-as="row">
+                                            <tr t-attf-style="background:{{ 'white' if row_index % 2 == 0 else '#fbe9e7' }};border-bottom:1px solid #ffccbc;">
+                                                <td style="padding:3px 4px;border:1px solid #ffccbc;font-weight:bold;">
+                                                    <t t-esc="row['dealer_name']"/>
+                                                </td>
+                                                <t t-foreach="row['qtys']" t-as="qty">
+                                                    <td style="padding:3px 4px;text-align:center;border:1px solid #ffccbc;">
+                                                        <t t-if="qty">
+                                                            <t t-esc="qty % 1 == 0 and int(qty) or qty"/>
+                                                        </t>
+                                                        <t t-else=""/>
+                                                    </td>
+                                                </t>
+                                                <td style="padding:3px 4px;text-align:right;border:1px solid #ffccbc;font-weight:bold;color:#bf360c;">
+                                                    <t t-esc="'%.2f' % row['total']"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="background:#bf360c;color:white;font-weight:bold;">
+                                            <td style="padding:3px 4px;border:1px solid #e64a19;">
+                                                TOTAL BOX
+                                            </td>
+                                            <t t-foreach="rdata['box_col_totals']" t-as="ct">
+                                                <td style="padding:3px 4px;text-align:center;border:1px solid #e64a19;">
+                                                    <t t-if="ct">
+                                                        <t t-esc="ct % 1 == 0 and int(ct) or ct"/>
+                                                    </t>
+                                                    <t t-else="">-</t>
+                                                </td>
+                                            </t>
+                                            <td style="padding:3px 4px;text-align:right;border:1px solid #e64a19;background:#7f0000;">
+                                                <t t-esc="'%.2f' % rdata['box_grand_total']"/>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </t>
+
+                        <!-- ── Grand Summary footer ──────────────────────────── -->
+                        <div style="margin-top:12px;border-top:2px solid #1a237e;padding-top:6px;text-align:right;">
+                            <span style="font-size:11px;font-weight:bold;color:#1a237e;">
+                                Grand Total (Regular): Rs
+                                <t t-esc="'%.2f' % rdata['regular_grand_total']"/>
+                            </span>
+                            <t t-if="rdata['box_products']">
+                                &#160;&#160;|&#160;&#160;
+                                <span style="font-size:11px;font-weight:bold;color:#bf360c;">
+                                    Grand Total (Box): Rs
+                                    <t t-esc="'%.2f' % rdata['box_grand_total']"/>
+                                </span>
+                                &#160;&#160;|&#160;&#160;
+                                <span style="font-size:12px;font-weight:bold;color:#1b5e20;">
+                                    SHEET TOTAL: Rs
+                                    <t t-esc="'%.2f' % (rdata['regular_grand_total'] + rdata['box_grand_total'])"/>
+                                </span>
+                            </t>
                         </div>
-                        <div style="margin-top:50px;display:flex;justify-content:space-between;">
-                            <div style="border-top:1px solid #333;width:180px;padding-top:4px;font-size:11px;">Driver Signature</div>
-                            <div style="border-top:1px solid #333;width:180px;padding-top:4px;font-size:11px;">Authorized Signature</div>
-                        </div>
+
+                        <!-- ── Signature strip ───────────────────────────────── -->
+                        <table style="width:100%;margin-top:30px;">
+                            <tr>
+                                <td style="width:40%;border-top:1px solid #333;padding-top:3px;font-size:9px;">
+                                    Driver Signature
+                                </td>
+                                <td style="width:20%;"></td>
+                                <td style="width:40%;border-top:1px solid #333;padding-top:3px;font-size:9px;text-align:right;">
+                                    Authorized Signature
+                                </td>
+                            </tr>
+                        </table>
+
                     </div>
                 </t>
             </t>

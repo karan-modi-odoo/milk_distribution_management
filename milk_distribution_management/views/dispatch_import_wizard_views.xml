@@ -1,0 +1,85 @@
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dispatch.import.wizard — Form View (dialog)
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dispatch_import_wizard_form" model="ir.ui.view">
+        <field name="name">milk.dispatch.import.wizard.form</field>
+        <field name="model">milk.dispatch.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Dispatch Lines from Excel">
+                <sheet>
+
+                    <div class="oe_title">
+                        <h2>Import Dispatch Lines</h2>
+                    </div>
+
+                    <!-- Step-by-step instructions -->
+                    <div class="alert alert-info" role="alert">
+                        <strong>How to import:</strong>
+                        <ol class="mb-0 mt-1">
+                            <li>
+                                Click <strong>Download Template</strong> to get a
+                                blank Excel sheet with the correct column layout.
+                            </li>
+                            <li>
+                                Fill in <em>Dealer Name</em>, <em>Product Name</em>,
+                                <em>Qty</em>, and optionally <em>Rate (Rs)</em>
+                                — one product per row. Leave Rate blank to use the
+                                product's configured default rate.
+                            </li>
+                            <li>
+                                Save the file (keep it as <strong>.xlsx</strong>),
+                                then upload it below and click
+                                <strong>Import Lines</strong>.
+                            </li>
+                        </ol>
+                    </div>
+
+                    <group>
+                        <group string="Upload File">
+                            <field name="sheet_id" invisible="1"/>
+                            <field name="import_file"
+                                   string="Excel / ODS File"
+                                   filename="import_filename"
+                                   widget="binary"
+                                   required="1"/>
+                            <field name="import_filename" invisible="1"/>
+                        </group>
+                    </group>
+
+                </sheet>
+
+                <footer>
+                    <button name="action_import"
+                            type="object"
+                            string="Import Lines"
+                            class="btn-primary"
+                            data-hotkey="v"/>
+                    <button name="action_download_template"
+                            type="object"
+                            string="Download Template"
+                            class="btn-secondary"
+                            data-hotkey="t"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         Window action — opens the wizard as a dialog from the dispatch form
+         context={'default_sheet_id': active_id} pre-fills the sheet link
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="action_dispatch_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import Dispatch Lines</field>
+        <field name="res_model">milk.dispatch.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dispatch_import_wizard_form"/>
+        <field name="target">new</field>
+        <field name="context">{'default_sheet_id': active_id}</field>
+    </record>
+
+</odoo>

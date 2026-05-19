@@ -1,90 +1,252 @@
 <odoo>
 
+    <!-- ══════════════════════════════════════════════════════════════════════
+         Bulk Actions — bound to milk.dispatch.sheet list view
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Bulk Confirm -->
+    <record id="action_bulk_confirm_dispatch" model="ir.actions.server">
+        <field name="name">Bulk Confirm</field>
+        <field name="model_id" ref="model_milk_dispatch_sheet"/>
+        <field name="binding_model_id" ref="model_milk_dispatch_sheet"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_bulk_confirm()</field>
+    </record>
+
+    <!-- Bulk Mark as Delivered -->
+    <record id="action_bulk_deliver_dispatch" model="ir.actions.server">
+        <field name="name">Bulk Mark as Delivered</field>
+        <field name="model_id" ref="model_milk_dispatch_sheet"/>
+        <field name="binding_model_id" ref="model_milk_dispatch_sheet"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_bulk_deliver()</field>
+    </record>
+
+    <!-- Export Summary CSV -->
+    <record id="action_export_summary_dispatch" model="ir.actions.server">
+        <field name="name">Export Summary (CSV)</field>
+        <field name="model_id" ref="model_milk_dispatch_sheet"/>
+        <field name="binding_model_id" ref="model_milk_dispatch_sheet"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_export_summary()</field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dispatch.sheet — List View
+         ══════════════════════════════════════════════════════════════════════ -->
     <record id="dispatch_list" model="ir.ui.view">
         <field name="name">milk.dispatch.sheet.list</field>
         <field name="model">milk.dispatch.sheet</field>
         <field name="arch" type="xml">
-            <list decoration-success="state == 'confirmed'"
+            <list decoration-success="state == 'delivered'"
+                  decoration-info="state == 'confirmed'"
                   decoration-warning="state == 'draft'">
                 <field name="name"/>
                 <field name="date"/>
-                <field name="route"/>
-                <field name="driver_id"/>
-                <field name="total_dealers"/>
-                <field name="total_amount" sum="Grand Total"/>
+                <field name="route_id" string="Route"/>
+                <field name="driver_id" domain="[('milk_is_driver', '=', True)]"/>
+                <field name="total_dealers" string="Dealers"/>
+                <field name="total_amount" string="Total (Rs)" sum="Grand Total"/>
                 <field name="state" widget="badge"
-                       decoration-success="state == 'confirmed'"
+                       decoration-success="state == 'delivered'"
+                       decoration-info="state == 'confirmed'"
                        decoration-warning="state == 'draft'"/>
             </list>
         </field>
     </record>
 
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dispatch.line — Inline Form Dialog
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dispatch_line_form_dialog" model="ir.ui.view">
+        <field name="name">milk.dispatch.line.form.dialog</field>
+        <field name="model">milk.dispatch.line</field>
+        <field name="arch" type="xml">
+            <form string="Dealer Order">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="partner_id" string="Dealer"/>
+                        <h2>
+                            <field name="partner_id"
+                                   placeholder="Select dealer…"
+                                   options="{'no_create': True}"
+                                   domain="[('milk_is_dealer', '=', True)]"/>
+                        </h2>
+                    </div>
+
+                    <separator string="Products Ordered"/>
+                    <field name="product_line_ids">
+                        <list editable="bottom"
+                              string="Products"
+                              no_open="True">
+                            <field name="product_id"
+                                   placeholder="Select product…"
+                                   options="{'no_create': True}"/>
+                            <field name="is_piece_based"
+                                   string="Piece-Based"
+                                   readonly="1"
+                                   optional="show"
+                                   widget="boolean"/>
+                            <field name="qty"
+                                   string="Qty"
+                                   decoration-danger="qty == 0"/>
+                            <field name="pieces_per_crate"
+                                   string="Pcs/Crate"
+                                   readonly="1"
+                                   optional="show"/>
+                            <field name="pieces_qty"
+                                   string="Pieces"
+                                   readonly="1"
+                                   optional="show"
+                                   decoration-muted="pieces_per_crate == 0"/>
+                            <field name="rate"
+                                   string="Rate (Rs)"/>
+                            <field name="amount"
+                                   string="Amount (Rs)"
+                                   readonly="1"
+                                   sum="Total"/>
+                        </list>
+                    </field>
+
+                    <group class="oe_subtotal_footer">
+                        <field name="total_amount"
+                               string="Dealer Total (Rs)"
+                               readonly="1"
+                               class="oe_subtotal_footer_separator"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dispatch.sheet — Form View
+         ══════════════════════════════════════════════════════════════════════ -->
     <record id="dispatch_form" model="ir.ui.view">
         <field name="name">milk.dispatch.sheet.form</field>
         <field name="model">milk.dispatch.sheet</field>
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <!-- Existing: Fill from Default Orders -->
+                    <button name="action_fill_from_default_orders" type="object"
+                            string="Fill from Default Orders"
+                            class="btn-secondary"
+                            invisible="state != 'draft'"
+                            help="Pre-fill dealer lines from the default order templates configured for this route."/>
+
+                    <!-- NEW: Import from Excel — opens the import wizard dialog -->
+                    <button name="%(milk_distribution_management.action_dispatch_import_wizard)d"
+                            type="action"
+                            string="Import from Excel"
+                            class="btn-secondary"
+                            invisible="state != 'draft'"
+                            help="Import dealer and product lines from an Excel (.xlsx) or ODS file."/>
+
+                    <!-- Existing: Copy Last Sheet -->
+                    <button name="action_copy_last_sheet" type="object"
+                            string="Copy Last Sheet"
+                            class="btn-secondary"
+                            invisible="state != 'draft'"/>
+
+                    <!-- Existing: Confirm -->
                     <button name="action_confirm" type="object"
                             string="Confirm and Create Invoices"
-                            class="btn-primary"/>
-                    <field name="state" widget="statusbar"/>
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+
+                    <!-- Existing: Mark as Delivered -->
+                    <button name="action_mark_delivered" type="object"
+                            string="Mark as Delivered"
+                            class="btn-success"
+                            invisible="state != 'confirmed'"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,delivered"/>
                 </header>
+
                 <sheet>
+                    <!-- Smart buttons -->
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_invoices" type="object"
                                 class="oe_stat_button" icon="fa-file-text-o"
                                 invisible="invoice_count == 0">
-                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                            <field name="invoice_count" widget="statinfo"
+                                   string="Invoices"/>
                         </button>
-                        <button class="oe_stat_button" icon="fa-users" type="object">
-                            <field name="total_dealers" widget="statinfo" string="Dealers"/>
+                        <button class="oe_stat_button" icon="fa-users"
+                                type="object">
+                            <field name="total_dealers" widget="statinfo"
+                                   string="Dealers"/>
                         </button>
                     </div>
+
                     <div class="oe_title">
-                        <h1><field name="name" readonly="1"/></h1>
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
                     </div>
+
                     <group>
                         <group string="Dispatch Info">
-                            <field name="date"/>
-                            <field name="route"/>
+                            <field name="date"
+                                   readonly="state in ('confirmed','delivered')"/>
+                            <field name="route_id" string="Route"
+                                   readonly="state in ('confirmed','delivered')"/>
                         </group>
                         <group string="Driver Info">
-                            <field name="driver_id"/>
+                            <field name="driver_id"
+                                   readonly="state in ('confirmed','delivered')"
+                                   domain="[('milk_is_driver', '=', True)]"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Dealer Lines" name="lines">
-                            <field name="line_ids">
-                                <list editable="bottom">
-                                    <field name="partner_id"/>
-                                    <field name="total_amount" readonly="1"/>
-                                </list>
-                                <form>
-                                    <group>
-                                        <field name="partner_id"/>
-                                    </group>
-                                    <field name="product_line_ids">
-                                        <list editable="bottom">
-                                            <field name="product_id"/>
-                                            <field name="qty" string="Qty/Crates"/>
-                                            <field name="rate" string="Rate (Rs)"/>
-                                            <field name="amount" string="Amount (Rs)" readonly="1"/>
-                                        </list>
-                                    </field>
-                                </form>
-                            </field>
-                        </page>
-                    </notebook>
-                    <group>
-                        <field name="total_amount" string="Sheet Total (Rs)" readonly="1"/>
+
+                    <!-- How-to banner (draft only) -->
+                    <div class="alert alert-info" role="alert"
+                         invisible="state != 'draft'">
+                        <strong>How to enter dealer orders:</strong>
+                        Click <strong>Add a line</strong> to add a new dealer,
+                        or click an <strong>existing dealer row</strong> to
+                        open their order and add / edit products, quantities
+                        and rates. You can also use
+                        <strong>Import from Excel</strong> to bulk-load orders
+                        from a spreadsheet.
+                    </div>
+
+                    <!-- Dealer order table -->
+                    <field name="line_ids"
+                           string="Dealer Orders"
+                           readonly="state in ('confirmed','delivered')"
+                           context="{'form_view_ref': 'milk_distribution_management.view_dispatch_line_form_dialog'}">
+                        <list string="Dealer Orders"
+                              no_open="False">
+                            <field name="partner_id" string="Dealer"
+                                   options="{'no_create': True}"
+                                   domain="[('milk_is_dealer', '=', True)]"/>
+                            <field name="total_amount"
+                                   string="Order Total (Rs)"
+                                   sum="Sheet Total"
+                                   readonly="1"/>
+                        </list>
+                    </field>
+
+                    <group class="oe_subtotal_footer">
+                        <field name="total_amount"
+                               string="Sheet Total (Rs)"
+                               readonly="1"
+                               class="oe_subtotal_footer_separator"/>
                     </group>
                 </sheet>
+
                 <chatter/>
             </form>
         </field>
     </record>
 
+    <!-- Window action -->
     <record id="dispatch_action" model="ir.actions.act_window">
         <field name="name">Dispatch Sheets</field>
         <field name="res_model">milk.dispatch.sheet</field>

@@ -1,0 +1,35 @@
+<odoo>
+
+    <record id="view_milk_route_list" model="ir.ui.view">
+        <field name="name">milk.route.list</field>
+        <field name="model">milk.route</field>
+        <field name="arch" type="xml">
+            <list string="Delivery Routes" editable="bottom">
+                <field name="name"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_milk_route_form" model="ir.ui.view">
+        <field name="name">milk.route.form</field>
+        <field name="model">milk.route</field>
+        <field name="arch" type="xml">
+            <form string="Delivery Route">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active" widget="boolean_toggle"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_milk_route" model="ir.actions.act_window">
+        <field name="name">Delivery Routes</field>
+        <field name="res_model">milk.route</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

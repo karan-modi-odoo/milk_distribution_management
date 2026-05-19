@@ -1,0 +1,205 @@
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         1. Dairy Crate Order Report
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="view_periodic_crate_order_form" model="ir.ui.view">
+        <field name="name">milk.periodic.crate.order.report.form</field>
+        <field name="model">milk.periodic.crate.order.report</field>
+        <field name="arch" type="xml">
+            <form string="Dairy Crate Order Report">
+                <header>
+                    <button name="action_generate" string="Generate" type="object"
+                            class="btn-primary"/>
+                    <button name="action_print" string="Print PDF" type="object"
+                            class="btn-secondary"
+                            invisible="not line_ids"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Dairy Crate Order Report</h1>
+                        <h3 class="text-muted">
+                            <field name="period_label" readonly="1"/>
+                        </h3>
+                    </div>
+
+                    <group>
+                        <group string="Period">
+                            <field name="period_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="month"
+                                   invisible="period_type != 'monthly'"
+                                   required="period_type == 'monthly'"/>
+                            <field name="quarter"
+                                   invisible="period_type != 'quarterly'"
+                                   required="period_type == 'quarterly'"/>
+                            <field name="year"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="order_count" readonly="1"/>
+                            <field name="total_ordered_qty" readonly="1"/>
+                            <field name="total_ordered_amount" readonly="1"/>
+                            <field name="date_from" readonly="1"/>
+                            <field name="date_to" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <field name="line_ids" readonly="1">
+                        <list>
+                            <field name="product_id"/>
+                            <field name="total_qty" string="Total Ordered (Crates)" sum="Total"/>
+                            <field name="total_amount" string="Total Amount (Rs)" sum="Total"/>
+                            <field name="order_count" string="Orders"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_periodic_crate_order_report" model="ir.actions.act_window">
+        <field name="name">Dairy Crate Order Report</field>
+        <field name="res_model">milk.periodic.crate.order.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         2. Dealer-wise Crate Usage Report
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="view_periodic_dealer_crate_form" model="ir.ui.view">
+        <field name="name">milk.periodic.dealer.crate.report.form</field>
+        <field name="model">milk.periodic.dealer.crate.report</field>
+        <field name="arch" type="xml">
+            <form string="Dealer-wise Crate Usage Report">
+                <header>
+                    <button name="action_generate" string="Generate" type="object"
+                            class="btn-primary"/>
+                    <button name="action_print" string="Print PDF" type="object"
+                            class="btn-secondary"
+                            invisible="not line_ids"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Dealer-wise Crate Usage Report</h1>
+                        <h3 class="text-muted">
+                            <field name="period_label" readonly="1"/>
+                        </h3>
+                    </div>
+
+                    <group>
+                        <group string="Period">
+                            <field name="period_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="month"
+                                   invisible="period_type != 'monthly'"
+                                   required="period_type == 'monthly'"/>
+                            <field name="quarter"
+                                   invisible="period_type != 'quarterly'"
+                                   required="period_type == 'quarterly'"/>
+                            <field name="year"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="total_issued" readonly="1"/>
+                            <field name="total_returned" readonly="1"/>
+                            <field name="total_net_crates" readonly="1"/>
+                            <field name="date_from" readonly="1"/>
+                            <field name="date_to" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <field name="line_ids" readonly="1">
+                        <list>
+                            <field name="partner_id" string="Dealer"/>
+                            <field name="opening" string="Opening Crates"/>
+                            <field name="issued" string="Issued" sum="Total Issued"/>
+                            <field name="returned" string="Returned" sum="Total Returned"/>
+                            <field name="closing" string="Closing Crates" sum="Net"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_periodic_dealer_crate_report" model="ir.actions.act_window">
+        <field name="name">Dealer Crate Usage Report</field>
+        <field name="res_model">milk.periodic.dealer.crate.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         3. Periodic Ledger Report (Transactions / Payments / Credit / Crates)
+         ══════════════════════════════════════════════════════════════════════ -->
+
+    <record id="view_periodic_ledger_report_form" model="ir.ui.view">
+        <field name="name">milk.periodic.ledger.report.form</field>
+        <field name="model">milk.periodic.ledger.report</field>
+        <field name="arch" type="xml">
+            <form string="Periodic Ledger Report">
+                <header>
+                    <button name="action_generate" string="Generate" type="object"
+                            class="btn-primary"/>
+                    <button name="action_print" string="Print PDF" type="object"
+                            class="btn-secondary"
+                            invisible="not line_ids"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Periodic Ledger Report</h1>
+                        <h3 class="text-muted">
+                            <field name="period_label" readonly="1"/>
+                        </h3>
+                    </div>
+
+                    <group>
+                        <group string="Period">
+                            <field name="period_type" widget="radio" options="{'horizontal': true}"/>
+                            <field name="month"
+                                   invisible="period_type != 'monthly'"
+                                   required="period_type == 'monthly'"/>
+                            <field name="quarter"
+                                   invisible="period_type != 'quarterly'"
+                                   required="period_type == 'quarterly'"/>
+                            <field name="year"/>
+                        </group>
+                        <group string="Period Summary">
+                            <field name="date_from" readonly="1"/>
+                            <field name="date_to" readonly="1"/>
+                            <field name="grand_total_billed" readonly="1"/>
+                            <field name="grand_total_paid" readonly="1"/>
+                            <field name="grand_closing_cash" readonly="1"/>
+                            <field name="grand_issued_crates" readonly="1"/>
+                            <field name="grand_returned_crates" readonly="1"/>
+                            <field name="grand_closing_crates" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <separator string="Dealer-wise Breakdown"/>
+                    <field name="line_ids" readonly="1">
+                        <list>
+                            <field name="partner_id" string="Dealer"/>
+                            <field name="opening_balance" string="Opening (Rs)"/>
+                            <field name="total_billed" string="Billed (Rs)" sum="Total"/>
+                            <field name="total_paid" string="Paid (Rs)" sum="Total"/>
+                            <field name="closing_balance" string="Balance (Rs)" sum="Total"/>
+                            <field name="opening_crates" string="Opening Crates"/>
+                            <field name="issued_crates" string="Issued" sum="Total"/>
+                            <field name="returned_crates" string="Returned" sum="Total"/>
+                            <field name="closing_crates" string="Net Crates" sum="Total"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_periodic_ledger_report" model="ir.actions.act_window">
+        <field name="name">Periodic Ledger Report</field>
+        <field name="res_model">milk.periodic.ledger.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

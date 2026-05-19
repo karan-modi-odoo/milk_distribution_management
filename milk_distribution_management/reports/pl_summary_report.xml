@@ -1,0 +1,148 @@
+<odoo>
+
+    <record id="action_report_pl_summary" model="ir.actions.report">
+        <field name="name">P&amp;L Summary</field>
+        <field name="model">milk.pl.summary</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_pl_summary</field>
+    </record>
+
+    <template id="report_pl_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Header -->
+                        <div style="border-bottom:3px solid #1a73e8;padding-bottom:10px;margin-bottom:20px;">
+                            <h2 style="color:#1a73e8;margin:0;">PROFIT &amp; LOSS SUMMARY</h2>
+                            <div style="font-size:13px;margin-top:4px;">
+                                <strong>
+                                    <t t-esc="company.name"/>
+                                </strong>
+                                &#160;|&#160;
+                                Period:
+                                <t t-esc="doc.date_from.strftime('%d-%m-%Y')"/>
+                                to
+                                <t t-esc="doc.date_to.strftime('%d-%m-%Y')"/>
+                            </div>
+                        </div>
+
+                        <!-- P&L Table -->
+                        <table style="width:60%;border-collapse:collapse;font-size:13px;">
+
+                            <!-- Section: Revenue -->
+                            <tr>
+                                <td colspan="2"
+                                    style="padding:6px 8px;background:#f5f5f5;
+                                           font-weight:bold;color:#555;
+                                           border-top:1px solid #ddd;
+                                           text-transform:uppercase;
+                                           font-size:11px;letter-spacing:.5px;">
+                                    Revenue
+                                </td>
+                            </tr>
+                            <tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:8px 16px;">Total Dealer Billing</td>
+                                <td style="padding:8px;text-align:right;">
+                                    Rs
+                                    <t t-esc="'%.2f' % doc.total_dealer_billing"/>
+                                </td>
+                            </tr>
+
+                            <!-- Section: Cost -->
+                            <tr>
+                                <td colspan="2"
+                                    style="padding:6px 8px;background:#f5f5f5;
+                                           font-weight:bold;color:#555;
+                                           border-top:1px solid #ddd;
+                                           text-transform:uppercase;
+                                           font-size:11px;letter-spacing:.5px;">
+                                    Cost of Goods
+                                </td>
+                            </tr>
+                            <tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:8px 16px;">Dairy Purchase Cost</td>
+                                <td style="padding:8px;text-align:right;color:#d32f2f;">
+                                    Rs
+                                    <t t-esc="'%.2f' % doc.dairy_purchase_cost"/>
+                                </td>
+                            </tr>
+
+                            <!-- Gross Margin -->
+                            <tr style="background:#e8f0fe;border-top:2px solid #1a73e8;">
+                                <td style="padding:10px 8px;font-weight:bold;">
+                                    Gross Margin
+                                </td>
+                                <td style="padding:10px 8px;text-align:right;
+                                           font-weight:bold;color:#1a73e8;">
+                                    Rs
+                                    <t t-esc="'%.2f' % doc.gross_margin"/>
+                                </td>
+                            </tr>
+
+                            <!-- Section: Other Income / Expenses -->
+                            <tr>
+                                <td colspan="2"
+                                    style="padding:6px 8px;background:#f5f5f5;
+                                           font-weight:bold;color:#555;
+                                           border-top:1px solid #ddd;
+                                           text-transform:uppercase;
+                                           font-size:11px;letter-spacing:.5px;">
+                                    Other Income / Expenses
+                                </td>
+                            </tr>
+                            <tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:8px 16px;">Crate Rental Income</td>
+                                <td style="padding:8px;text-align:right;color:#2e7d32;">
+                                    Rs
+                                    <t t-esc="'%.2f' % doc.crate_income"/>
+                                </td>
+                            </tr>
+                            <tr style="border-bottom:1px solid #eee;">
+                                <td style="padding:8px 16px;color:#999;">
+                                    Driver Expenses
+                                    <span style="font-size:10px;font-style:italic;">
+                                        (not tracked)
+                                    </span>
+                                </td>
+                                <td style="padding:8px;text-align:right;color:#999;">
+                                    Rs 0.00
+                                </td>
+                            </tr>
+
+                            <!-- Net Profit -->
+                            <tr style="background:#1a73e8;color:white;
+                                       border-top:2px solid #1557b0;">
+                                <td style="padding:12px 8px;font-weight:bold;
+                                           font-size:14px;">
+                                    Net Profit
+                                </td>
+                                <td style="padding:12px 8px;text-align:right;
+                                           font-weight:bold;font-size:14px;">
+                                    Rs
+                                    <t t-esc="'%.2f' % doc.net_profit"/>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- Data sources footer -->
+                        <div style="margin-top:32px;font-size:11px;color:#888;
+                                    border-top:1px solid #eee;padding-top:10px;">
+                            <strong>Data sources:</strong>
+                            <t t-esc="doc.dispatch_sheet_count"/>
+                            dispatch sheet(s),
+                            <t t-esc="doc.dairy_purchase_count"/>
+                            dairy purchase bill(s),
+                            <t t-esc="doc.crate_billing_count"/>
+                            crate billing record(s)
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,41 @@
+<odoo>
+    <!--
+        Adds Milk ERP fields to the standard res.partner form.
+        Appears as a new "Milk ERP" tab so it doesn't conflict with
+        other modules that extend the partner form.
+    -->
+    <record id="view_partner_milk_fields" model="ir.ui.view">
+        <field name="name">res.partner.milk.fields</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Milk ERP" name="milk_erp">
+                    <group>
+                        <!-- Role flags: control which partners appear in
+                             Driver / Collector / Dealer dropdowns. -->
+                        <group string="Roles">
+                            <field name="milk_is_dealer"
+                                   widget="boolean_toggle"
+                                   string="Is Milk Dealer"/>
+                            <field name="milk_is_driver"
+                                   widget="boolean_toggle"
+                                   string="Is Milk Driver"/>
+                            <field name="milk_is_collector"
+                                   widget="boolean_toggle"
+                                   string="Is Cash Collector"/>
+                        </group>
+                        <!-- Financial / operational settings (dealers only) -->
+                        <group string="Credit &amp; Crate Settings"
+                               invisible="not milk_is_dealer">
+                            <field name="milk_credit_limit"
+                                   string="Credit Limit (Rs)"/>
+                            <field name="crate_charge_per_day"
+                                   string="Crate Charge / Day (Rs)"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

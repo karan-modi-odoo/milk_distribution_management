@@ -1,0 +1,213 @@
+<odoo>
+
+    <!-- ══ Form View ════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_order_form" model="ir.ui.view">
+        <field name="name">milk.dairy.order.form</field>
+        <field name="model">milk.dairy.order</field>
+        <field name="arch" type="xml">
+            <form string="Dairy Order">
+                <header>
+                    <button name="action_generate_from_sheets"
+                            string="Generate from Dispatch Sheets"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_mark_sent"
+                            string="Mark as Sent"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_reset_draft"
+                            string="Reset to Draft"
+                            type="object"
+                            invisible="state != 'sent'"/>
+                    <button name="action_mark_fulfilled"
+                            string="Mark as Fulfilled"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'sent'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,sent,fulfilled"/>
+                </header>
+
+                <sheet>
+                    <!-- ── Smart button: linked bill ────────────────────── -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_purchase_bill"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                invisible="not purchase_id">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Purchase</span>
+                                <span class="o_stat_text">Bill</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Order Details">
+                            <field name="date"
+                                   readonly="state in ('sent', 'fulfilled')"/>
+                            <field name="dairy_name"
+                                   readonly="state in ('sent', 'fulfilled')"/>
+                        </group>
+                        <group string="Totals &amp; Bill Link">
+                            <field name="total_ordered_qty" readonly="1"/>
+                            <field name="total_ordered_amount" readonly="1"/>
+                            <field name="purchase_id"
+                                   string="Linked Purchase Bill"
+                                   readonly="state == 'fulfilled'"
+                                   help="Link the Dairy Purchase Bill once it arrives to compare ordered vs billed quantities."/>
+                        </group>
+                    </group>
+
+                    <!-- Banner: draft -->
+                    <div class="alert alert-info" role="alert"
+                         invisible="state != 'draft'">
+                        <strong>Step 1:</strong> Set the date, then click
+                        <strong>Generate from Dispatch Sheets</strong> to
+                        auto-fill quantities from all confirmed sheets for
+                        that date. Edit quantities if needed, then click
+                        <strong>Mark as Sent</strong> once the order is
+                        placed with the dairy.
+                    </div>
+
+                    <!-- Banner: sent -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="state != 'sent'">
+                        Order placed with dairy. Once the
+                        <strong>Dairy Purchase Bill</strong> arrives, link
+                        it in the field above to compare ordered vs billed
+                        quantities, then click
+                        <strong>Mark as Fulfilled</strong>.
+                    </div>
+
+                    <notebook>
+                        <page string="Products" name="products">
+                            <field name="line_ids"
+                                   readonly="state in ('sent', 'fulfilled')">
+                                <list editable="bottom">
+                                    <field name="product_id"
+                                           options="{'no_create': True}"/>
+                                    <field name="ordered_qty"
+                                           string="Ordered (Crates)"
+                                           decoration-warning="ordered_qty == 0"/>
+                                    <field name="rate" string="Rate (Rs)"/>
+                                    <field name="ordered_amount"
+                                           string="Amount (Rs)"
+                                           readonly="1"
+                                           sum="Total"/>
+                                    <!-- Comparison columns — always visible but computed -->
+                                    <field name="dispatched_qty"
+                                           string="Dispatched"
+                                           readonly="1"
+                                           optional="show"/>
+                                    <field name="billed_qty"
+                                           string="Billed"
+                                           readonly="1"
+                                           optional="show"/>
+                                    <field name="qty_difference"
+                                           string="Diff (Ord−Bill)"
+                                           readonly="1"
+                                           optional="show"
+                                           decoration-danger="qty_difference != 0"
+                                           decoration-success="qty_difference == 0"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notes" name="notes">
+                            <field name="notes"
+                                   placeholder="Vehicle details, special requests, any instructions for the dairy…"
+                                   readonly="state == 'fulfilled'"/>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ List View ════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_order_list" model="ir.ui.view">
+        <field name="name">milk.dairy.order.list</field>
+        <field name="model">milk.dairy.order</field>
+        <field name="arch" type="xml">
+            <list string="Dairy Orders"
+                  decoration-success="state == 'fulfilled'"
+                  decoration-info="state == 'sent'"
+                  decoration-warning="state == 'draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="dairy_name"/>
+                <field name="total_ordered_qty"
+                       string="Ordered (Crates)"
+                       sum="Total"/>
+                <field name="total_ordered_amount"
+                       string="Amount (Rs)"
+                       sum="Total"/>
+                <field name="purchase_id"
+                       string="Purchase Bill"
+                       optional="show"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-success="state == 'fulfilled'"
+                       decoration-info="state == 'sent'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Search View ══════════════════════════════════════════════════════ -->
+    <record id="view_dairy_order_search" model="ir.ui.view">
+        <field name="name">milk.dairy.order.search</field>
+        <field name="model">milk.dairy.order</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Reference"/>
+                <field name="dairy_name" string="Dairy"/>
+                <filter string="Draft"
+                        name="draft"
+                        domain="[('state','=','draft')]"/>
+                <filter string="Sent"
+                        name="sent"
+                        domain="[('state','=','sent')]"/>
+                <filter string="Fulfilled"
+                        name="fulfilled"
+                        domain="[('state','=','fulfilled')]"/>
+                <separator/>
+                <filter string="Today"
+                        name="today"
+                        domain="[('date','=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group>
+                    <filter string="Date"
+                            name="by_date"
+                            context="{'group_by': 'date'}"/>
+                    <filter string="Dairy"
+                            name="by_dairy"
+                            context="{'group_by': 'dairy_name'}"/>
+                    <filter string="Status"
+                            name="by_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Window Action ════════════════════════════════════════════════════ -->
+    <record id="action_dairy_order" model="ir.actions.act_window">
+        <field name="name">Dairy Orders</field>
+        <field name="res_model">milk.dairy.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dairy_order_search"/>
+        <field name="context">{'search_default_sent': 1}</field>
+    </record>
+
+</odoo>

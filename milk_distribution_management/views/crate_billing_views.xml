@@ -1,0 +1,119 @@
+<odoo>
+
+    <!-- ── Crate Billing Form ────────────────────────────────────────────── -->
+    <record id="view_crate_billing_form" model="ir.ui.view">
+        <field name="name">milk.crate.billing.form</field>
+        <field name="model">milk.crate.billing</field>
+        <field name="arch" type="xml">
+            <form string="Crate Billing">
+                <header>
+                    <button name="action_approve" type="object"
+                            string="Approve &amp; Invoice"
+                            class="btn-primary"
+                            invisible="state != 'draft'"
+                            groups="milk_distribution_management.group_milk_manager"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Billing Info">
+                            <field name="partner_id"
+                                   readonly="state == 'approved'"/>
+                            <field name="date_from"
+                                   readonly="state == 'approved'"/>
+                            <field name="date_to"
+                                   readonly="state == 'approved'"/>
+                            <field name="charge_per_day" readonly="1"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="total_charge" readonly="1"/>
+                            <field name="invoice_id" readonly="1"
+                                   invisible="not invoice_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Daily Lines" name="lines">
+                            <field name="line_ids"
+                                   readonly="state == 'approved'">
+                                <list>
+                                    <field name="date"/>
+                                    <field name="closing_crates"
+                                           string="Crates Held"/>
+                                    <field name="charge_per_day"
+                                           string="Rate (Rs/Crate/Day)"/>
+                                    <field name="charge_amount"
+                                           string="Charge (Rs)"
+                                           sum="Total"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Crate Billing List ────────────────────────────────────────────── -->
+    <record id="view_crate_billing_list" model="ir.ui.view">
+        <field name="name">milk.crate.billing.list</field>
+        <field name="model">milk.crate.billing</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'approved'"
+                  decoration-warning="state == 'draft'">
+                <field name="name"/>
+                <field name="partner_id" string="Dealer"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="total_charge" sum="Total" string="Total Charge (Rs)"/>
+                <field name="invoice_id" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-warning="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Crate Billing Action ──────────────────────────────────────────── -->
+    <record id="action_crate_billing" model="ir.actions.act_window">
+        <field name="name">Crate Billing</field>
+        <field name="res_model">milk.crate.billing</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ── Crate Billing Wizard ──────────────────────────────────────────── -->
+    <record id="view_crate_billing_wizard_form" model="ir.ui.view">
+        <field name="name">milk.crate.billing.wizard.form</field>
+        <field name="model">milk.crate.billing.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Crate Billing">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </group>
+                <div class="alert alert-info" role="alert">
+                    The crate ledger must be generated for this date range first
+                    (Crates → Generate Crate Ledger).
+                </div>
+                <footer>
+                    <button name="action_generate" type="object"
+                            string="Generate" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_crate_billing_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Crate Billing</field>
+        <field name="res_model">milk.crate.billing.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

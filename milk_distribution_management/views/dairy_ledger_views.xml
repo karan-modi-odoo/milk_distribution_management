@@ -1,0 +1,176 @@
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dairy.ledger — Form View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_ledger_form" model="ir.ui.view">
+        <field name="name">milk.dairy.ledger.form</field>
+        <field name="model">milk.dairy.ledger</field>
+        <field name="arch" type="xml">
+            <form string="Dairy Ledger Entry">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="dairy_name" string="Dairy"/>
+                        <h1>
+                            <field name="dairy_name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Entry Details">
+                            <field name="date" readonly="1"/>
+                            <field name="dairy_name" readonly="1"/>
+                        </group>
+                        <group string="Balances">
+                            <field name="opening_balance" readonly="1"/>
+                            <field name="bill_amount" readonly="1"/>
+                            <field name="paid_amount" readonly="1"/>
+                            <field name="closing_balance" readonly="1"
+                                   decoration-danger="closing_balance &gt; 0"
+                                   decoration-success="closing_balance &lt;= 0"/>
+                        </group>
+                    </group>
+
+                    <separator string="Linked Purchase Bills"/>
+                    <field name="purchase_ids" readonly="1">
+                        <list string="Purchase Bills">
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="dairy_name"/>
+                            <field name="total_amount" string="Bill Amt (Rs)"
+                                   sum="Total"/>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'confirmed'"/>
+                        </list>
+                    </field>
+
+                    <separator string="Linked Transfers / Payments"/>
+                    <field name="transfer_ids" readonly="1">
+                        <list string="Transfers">
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="dairy_name"/>
+                            <field name="payment_mode" widget="badge"/>
+                            <field name="amount" string="Paid (Rs)" sum="Total"/>
+                            <field name="state" widget="badge"
+                                   decoration-success="state == 'confirmed'"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dairy.ledger — List View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_ledger_list" model="ir.ui.view">
+        <field name="name">milk.dairy.ledger.list</field>
+        <field name="model">milk.dairy.ledger</field>
+        <field name="arch" type="xml">
+            <list string="Dairy Ledger"
+                  decoration-danger="closing_balance &gt; 0"
+                  decoration-success="closing_balance &lt;= 0">
+                <field name="date"/>
+                <field name="dairy_name"/>
+                <field name="opening_balance" string="Opening (Rs)" sum="Total Opening"/>
+                <field name="bill_amount" string="Bills (Rs)" sum="Total Bills"/>
+                <field name="paid_amount" string="Paid (Rs)" sum="Total Paid"/>
+                <field name="closing_balance" string="Closing (Rs)" sum="Total Outstanding"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dairy.ledger — Search View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_ledger_search" model="ir.ui.view">
+        <field name="name">milk.dairy.ledger.search</field>
+        <field name="model">milk.dairy.ledger</field>
+        <field name="arch" type="xml">
+            <search string="Dairy Ledger">
+                <field name="dairy_name" string="Dairy"/>
+                <field name="date"/>
+                <separator/>
+                <filter name="filter_outstanding"
+                        string="Outstanding"
+                        domain="[('closing_balance', '&gt;', 0)]"/>
+                <filter name="filter_settled"
+                        string="Settled"
+                        domain="[('closing_balance', '&lt;=', 0)]"/>
+                <separator/>
+                <filter name="group_by_dairy" string="Dairy"
+                        context="{'group_by': 'dairy_name'}"/>
+                <filter name="group_by_date" string="Date"
+                        context="{'group_by': 'date'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         Window action
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="action_dairy_ledger" model="ir.actions.act_window">
+        <field name="name">Dairy Ledger</field>
+        <field name="res_model">milk.dairy.ledger</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_outstanding': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No dairy ledger entries yet
+            </p>
+            <p>
+                Ledger entries are created automatically when a
+                <strong>Dairy Purchase Bill</strong>
+                or a
+                <strong>Dairy Transfer</strong>
+                is confirmed.
+            </p>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dairy.purchase — inherit form to add Dairy Ledger smart button
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_purchase_form_ledger_btn" model="ir.ui.view">
+        <field name="name">milk.dairy.purchase.form.ledger.btn</field>
+        <field name="model">milk.dairy.purchase</field>
+        <field name="inherit_id" ref="view_dairy_purchase_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_dairy_ledger" type="object"
+                        class="oe_stat_button" icon="fa-book"
+                        invisible="dairy_ledger_count == 0">
+                    <field name="dairy_ledger_count" widget="statinfo"
+                           string="Ledger"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dairy.transfer — inherit form to add Dairy Ledger smart button
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_transfer_form_ledger_btn" model="ir.ui.view">
+        <field name="name">milk.dairy.transfer.form.ledger.btn</field>
+        <field name="model">milk.dairy.transfer</field>
+        <field name="inherit_id" ref="view_dairy_transfer_form"/>
+        <field name="arch" type="xml">
+            <!-- The dairy transfer form uses a plain <div class="oe_chatter">
+                 rather than a <sheet> with button_box, so we inject a
+                 button_box div at the top of the sheet. -->
+            <xpath expr="//form/sheet/div[hasclass('oe_title')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_view_dairy_ledger" type="object"
+                            class="oe_stat_button" icon="fa-book"
+                            invisible="dairy_ledger_count == 0">
+                        <field name="dairy_ledger_count" widget="statinfo"
+                               string="Ledger"/>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

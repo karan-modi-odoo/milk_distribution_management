@@ -1,0 +1,183 @@
+<odoo>
+
+    <!-- ══ Feature 2: Dairy Purchase Bill PDF ══════════════════════════════ -->
+
+    <record id="action_report_dairy_purchase_bill" model="ir.actions.report">
+        <field name="name">Dairy Purchase Bill</field>
+        <field name="model">milk.dairy.purchase</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">milk_distribution_management.report_dairy_purchase_bill</field>
+        <field name="binding_model_id" ref="model_milk_dairy_purchase"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_dairy_purchase_bill">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family:Arial,sans-serif;font-size:10px;">
+
+                        <!-- ── Header ──────────────────────────────────── -->
+                        <div style="border-bottom:2px solid #1a237e;padding-bottom:8px;margin-bottom:10px;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <tr>
+                                    <td>
+                                        <span style="font-size:15px;font-weight:bold;color:#1a237e;">
+                                            DAIRY PURCHASE BILL
+                                        </span>
+                                    </td>
+                                    <td style="text-align:right;font-size:10px;color:#555;">
+                                        <strong>Ref:</strong>
+                                        <t t-esc="doc.name"/>
+                                        &#160;|&#160;
+                                        <strong>Date:</strong>
+                                        <t t-esc="doc.date.strftime('%d-%m-%Y')"/>
+                                        &#160;|&#160;
+                                        <strong>Status:</strong>
+                                        <t t-esc="dict(doc.fields_get(['state'])['state']['selection'])[doc.state]"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- ── Bill Details ─────────────────────────────── -->
+                        <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">
+                            <tr>
+                                <td style="width:50%;vertical-align:top;">
+                                    <table style="border-collapse:collapse;">
+                                        <tr>
+                                            <td style="font-weight:bold;padding:2px 8px 2px 0;color:#333;">
+                                                Dairy / Supplier
+                                            </td>
+                                            <td style="padding:2px 0;">
+                                                <t t-esc="doc.dairy_name or '-'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight:bold;padding:2px 8px 2px 0;color:#333;">
+                                                Vehicle No.
+                                            </td>
+                                            <td style="padding:2px 0;">
+                                                <t t-esc="doc.vehicle_no or '-'"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight:bold;padding:2px 8px 2px 0;color:#333;">
+                                                Driver
+                                            </td>
+                                            <td style="padding:2px 0;">
+                                                <t t-esc="doc.driver_name or '-'"/>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td style="width:50%;vertical-align:top;text-align:right;">
+                                    <table style="border-collapse:collapse;margin-left:auto;">
+                                        <tr>
+                                            <td style="font-weight:bold;padding:2px 0 2px 16px;color:#333;">
+                                                Dispatched Amount (Rs)
+                                            </td>
+                                            <td style="padding:2px 0 2px 12px;text-align:right;">
+                                                <t t-esc="'%.2f' % doc.dispatched_amount"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight:bold;padding:2px 0 2px 16px;color:#333;">
+                                                Difference (Rs)
+                                            </td>
+                                            <td t-attf-style="padding:2px 0 2px 12px;text-align:right;color:{{ 'red' if doc.difference != 0 else 'green' }};font-weight:bold;">
+                                                <t t-esc="'%.2f' % doc.difference"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight:bold;padding:2px 0 2px 16px;color:#333;">
+                                                Reconciled
+                                            </td>
+                                            <td style="padding:2px 0 2px 12px;text-align:right;">
+                                                <t t-if="doc.reconciled">&#10004; Yes</t>
+                                                <t t-else="">&#10008; No</t>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ── Product Lines ────────────────────────────── -->
+                        <table style="width:100%;border-collapse:collapse;font-size:9px;">
+                            <thead>
+                                <tr style="background:#1a237e;color:white;">
+                                    <th style="padding:5px 8px;text-align:left;border:1px solid #3949ab;">
+                                        #
+                                    </th>
+                                    <th style="padding:5px 8px;text-align:left;border:1px solid #3949ab;">
+                                        Product
+                                    </th>
+                                    <th style="padding:5px 8px;text-align:center;border:1px solid #3949ab;">
+                                        Qty / Crates
+                                    </th>
+                                    <th style="padding:5px 8px;text-align:right;border:1px solid #3949ab;">
+                                        Rate (Rs)
+                                    </th>
+                                    <th style="padding:5px 8px;text-align:right;border:1px solid #3949ab;background:#0d47a1;">
+                                        Amount (Rs)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr t-attf-style="background:{{ 'white' if line_index % 2 == 0 else '#e8eaf6' }};border-bottom:1px solid #c5cae9;">
+                                        <td style="padding:4px 8px;border:1px solid #c5cae9;">
+                                            <t t-esc="line_index + 1"/>
+                                        </td>
+                                        <td style="padding:4px 8px;border:1px solid #c5cae9;">
+                                            <t t-esc="line.product_id.name if line.product_id else '-'"/>
+                                        </td>
+                                        <td style="padding:4px 8px;text-align:center;border:1px solid #c5cae9;">
+                                            <t t-esc="line.qty"/>
+                                        </td>
+                                        <td style="padding:4px 8px;text-align:right;border:1px solid #c5cae9;">
+                                            <t t-esc="'%.2f' % line.rate"/>
+                                        </td>
+                                        <td style="padding:4px 8px;text-align:right;border:1px solid #c5cae9;font-weight:bold;">
+                                            <t t-esc="'%.2f' % line.amount"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background:#1a237e;color:white;font-weight:bold;">
+                                    <td colspan="2" style="padding:5px 8px;border:1px solid #3949ab;">
+                                        TOTAL
+                                    </td>
+                                    <td style="padding:5px 8px;text-align:center;border:1px solid #3949ab;">
+                                        <t t-esc="doc.total_qty"/>
+                                    </td>
+                                    <td style="border:1px solid #3949ab;"></td>
+                                    <td style="padding:5px 8px;text-align:right;border:1px solid #3949ab;background:#0d47a1;">
+                                        Rs <t t-esc="'%.2f' % doc.total_amount"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- ── Signature strip ──────────────────────────── -->
+                        <table style="width:100%;margin-top:40px;">
+                            <tr>
+                                <td style="width:40%;border-top:1px solid #333;padding-top:4px;font-size:10px;">
+                                    Prepared By
+                                </td>
+                                <td style="width:20%;"></td>
+                                <td style="width:40%;border-top:1px solid #333;padding-top:4px;font-size:10px;text-align:right;">
+                                    Authorized Signature
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

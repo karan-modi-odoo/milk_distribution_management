@@ -24,7 +24,9 @@ class MilkDealerStatement(models.TransientModel):
         for rec in self:
             rec.total_billed = sum(rec.line_ids.mapped('today_bill'))
             rec.total_paid = sum(rec.line_ids.mapped('received_amount'))
-            rec.closing_balance = rec.line_ids[-1].closing_balance if rec.line_ids else 0.0
+            # Closing balance = last row in date-ascending order
+            sorted_lines = rec.line_ids.sorted('date')
+            rec.closing_balance = sorted_lines[-1].closing_balance if sorted_lines else 0.0
 
     def action_generate(self):
         self.ensure_one()

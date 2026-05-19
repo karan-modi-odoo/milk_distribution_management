@@ -5,7 +5,7 @@
         <field name="model">milk.partner.ledger</field>
         <field name="arch" type="xml">
             <list>
-                <field name="partner_id" string="Dealer"/>
+                <field name="partner_id" string="Dealer" domain="[('milk_is_dealer', '=', True)]"/>
                 <field name="date"/>
                 <field name="opening_balance" string="Opening (Rs)" sum="Total"/>
                 <field name="today_bill" string="Bill (Rs)" sum="Total"/>

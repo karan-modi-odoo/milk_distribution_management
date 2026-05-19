@@ -1,0 +1,105 @@
+<odoo>
+
+    <record id="view_pl_summary_form" model="ir.ui.view">
+        <field name="name">milk.pl.summary.form</field>
+        <field name="model">milk.pl.summary</field>
+        <field name="arch" type="xml">
+            <form string="P&amp;L Summary">
+                <sheet>
+
+                    <!-- Date range + buttons -->
+                    <group>
+                        <group string="Date Range">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group string=" ">
+                            <button name="action_generate" type="object"
+                                    string="Generate" class="btn-primary"/>
+                            <button name="action_print" type="object"
+                                    string="Print PDF" class="btn-secondary"
+                                    invisible="not is_generated"/>
+                        </group>
+                    </group>
+
+                    <field name="is_generated" invisible="1"/>
+
+                    <!-- P&L Statement -->
+                    <group string="Profit &amp; Loss Statement"
+                           invisible="not is_generated">
+
+                        <!-- Revenue block -->
+                        <group string="Revenue">
+                            <field name="total_dealer_billing" readonly="1"
+                                   widget="monetary"
+                                   options="{'currency_field': False}"/>
+                        </group>
+
+                        <!-- Cost block -->
+                        <group string="Cost of Goods">
+                            <field name="dairy_purchase_cost" readonly="1"
+                                   widget="monetary"
+                                   options="{'currency_field': False}"/>
+                        </group>
+
+                        <!-- Gross Margin -->
+                        <group string="Gross Margin">
+                            <field name="gross_margin" readonly="1"
+                                   widget="monetary"
+                                   options="{'currency_field': False}"/>
+                        </group>
+
+                        <!-- Other income / expenses -->
+                        <group string="Other Income / Expenses">
+                            <field name="crate_income" readonly="1"
+                                   widget="monetary"
+                                   options="{'currency_field': False}"/>
+                            <field name="driver_expenses" readonly="1"
+                                   widget="monetary"
+                                   options="{'currency_field': False}"/>
+                        </group>
+
+                        <!-- Net Profit -->
+                        <group string="Net Profit">
+                            <field name="net_profit" readonly="1"
+                                   widget="monetary"
+                                   options="{'currency_field': False}"/>
+                        </group>
+
+                    </group>
+
+                    <!-- Driver expenses notice -->
+                    <div class="alert alert-info" role="alert"
+                         invisible="not is_generated">
+                        <strong>Note:</strong>
+                        Driver Expenses are not tracked yet (shown as Rs 0.00).
+                        This line is reserved for a future driver expense model.
+                    </div>
+
+                    <!-- Data source counts -->
+                    <group string="Data Sources" invisible="not is_generated">
+                        <group>
+                            <field name="dispatch_sheet_count" readonly="1"
+                                   string="Dispatch Sheets included"/>
+                            <field name="dairy_purchase_count" readonly="1"
+                                   string="Dairy Purchase Bills included"/>
+                        </group>
+                        <group>
+                            <field name="crate_billing_count" readonly="1"
+                                   string="Crate Billing Records included"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pl_summary" model="ir.actions.act_window">
+        <field name="name">P&amp;L Summary</field>
+        <field name="res_model">milk.pl.summary</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

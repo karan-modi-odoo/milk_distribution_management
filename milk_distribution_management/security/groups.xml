@@ -1,0 +1,15 @@
+<odoo>
+
+    <!-- Milk ERP User — basic operational access -->
+    <record id="group_milk_user" model="res.groups">
+        <field name="name">Milk ERP User</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Milk ERP Manager — can approve/reject adjustments; implies User -->
+    <record id="group_milk_manager" model="res.groups">
+        <field name="name">Milk ERP Manager</field>
+        <field name="implied_ids" eval="[(4, ref('group_milk_user'))]"/>
+    </record>
+
+</odoo>

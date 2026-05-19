@@ -1,12 +1,75 @@
-<odoo>
-    <data noupdate="1">
-        <record id="seq_milk_dispatch_sheet" model="ir.sequence">
-            <field name="name">Milk Dispatch Sheet</field>
-            <field name="code">milk.dispatch.sheet</field>
-            <field name="prefix">DSP/%(year)s/</field>
-            <field name="padding">4</field>
-            <field name="number_next">1</field>
-            <field name="number_increment">1</field>
-        </record>
-    </data>
+<odoo noupdate="1">
+
+    <!-- Dispatch Sheet -->
+    <record id="seq_dispatch_sheet" model="ir.sequence">
+        <field name="name">Milk Dispatch Sheet</field>
+        <field name="code">milk.dispatch.sheet</field>
+        <field name="prefix">DSP/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Crate Transaction -->
+    <record id="seq_crate_transaction" model="ir.sequence">
+        <field name="name">Milk Crate Transaction</field>
+        <field name="code">milk.crate.transaction</field>
+        <field name="prefix">CRT/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Dairy Purchase Bill -->
+    <record id="seq_dairy_purchase" model="ir.sequence">
+        <field name="name">Milk Dairy Purchase Bill</field>
+        <field name="code">milk.dairy.purchase</field>
+        <field name="prefix">DPB/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Delivery Adjustment -->
+    <record id="seq_delivery_adjustment" model="ir.sequence">
+        <field name="name">Milk Delivery Adjustment</field>
+        <field name="code">milk.delivery.adjustment</field>
+        <field name="prefix">ADJ/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Bank Deposit -->
+    <record id="seq_bank_deposit" model="ir.sequence">
+        <field name="name">Milk Bank Deposit</field>
+        <field name="code">milk.bank.deposit</field>
+        <field name="prefix">BDP/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Dairy Transfer -->
+    <record id="seq_dairy_transfer" model="ir.sequence">
+        <field name="name">Milk Dairy Transfer</field>
+        <field name="code">milk.dairy.transfer</field>
+        <field name="prefix">DTR/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Crate Billing — Feature 1 -->
+    <record id="seq_crate_billing" model="ir.sequence">
+        <field name="name">Milk Crate Billing</field>
+        <field name="code">milk.crate.billing</field>
+        <field name="prefix">CBL/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Dairy Order — Gap #1 -->
+    <record id="seq_dairy_order" model="ir.sequence">
+        <field name="name">Milk Dairy Order</field>
+        <field name="code">milk.dairy.order</field>
+        <field name="prefix">DOD/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
 </odoo>

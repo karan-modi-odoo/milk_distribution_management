@@ -1,0 +1,110 @@
+<odoo>
+
+    <!--
+        Adds a "Milk Crate Config" tab to the standard product form.
+        Lives in a dedicated page so it never conflicts with other
+        modules that extend product.template.
+
+        Supports two mutually exclusive pricing modes:
+          1. Piece-Based  — sold per individual piece (e.g. Paneer)
+          2. Crate-Based  — sold in crates with pieces_per_crate tracking
+    -->
+    <record id="view_product_template_milk_crate" model="ir.ui.view">
+        <field name="name">product.template.milk.crate</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Milk Crate Config" name="milk_crate_config">
+
+                    <div class="alert alert-info" role="alert">
+                        Configure how this product is counted and billed in
+                        the Milk ERP dispatch sheets.
+                        Enable <strong>Piece-Based Item</strong> for products
+                        sold per individual piece (e.g. Paneer).
+                        For crate-based products, set
+                        <strong>Pieces per Crate = 0</strong> to disable
+                        crate logic.
+                    </div>
+
+                    <!-- ── Pricing Mode ──────────────────────────────── -->
+                    <group>
+                        <group string="Pricing Mode">
+                            <field name="milk_is_piece_based"
+                                   string="Piece-Based Item"
+                                   widget="boolean_toggle"
+                                   help="Enable for products sold per individual piece (e.g. Paneer). Disables all crate logic for this product."/>
+                        </group>
+                    </group>
+
+                    <!-- ── Piece-based summary banner ────────────────── -->
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not milk_is_piece_based">
+                        <strong>Piece-based pricing active.</strong>
+                        Quantity on dispatch lines represents individual pieces.
+                        Rate is charged per piece.
+                        Crate tracking, half-crate validation, and crate
+                        auto-issue are all disabled for this product.
+                    </div>
+
+                    <!-- ── Crate config (hidden when piece-based) ─────── -->
+                    <group invisible="milk_is_piece_based">
+                        <group string="Crate Definition">
+                            <field name="milk_pieces_per_crate"
+                                   string="Pieces per Crate"
+                                   help="Common values: 500ml=24, 1L=12, 6L=2, Curd/400g=6. Set 0 to disable."/>
+                            <field name="milk_allow_half_crate"
+                                   string="Allow Half-Crate Qty"
+                                   widget="boolean_toggle"
+                                   invisible="milk_pieces_per_crate == 0"/>
+                        </group>
+                        <group string="Default Billing Rate">
+                            <field name="milk_rate_per_crate"
+                                   string="Rate per Crate (Rs)"
+                                   invisible="milk_pieces_per_crate == 0"
+                                   help="Default rate used in dispatch lines. Dealer-specific rates always override this."/>
+                            <div class="text-muted" style="font-size:12px;"
+                                 invisible="milk_pieces_per_crate == 0">
+                                Dealer-specific rates (Configuration → Dealer Rates)
+                                take priority over this value.
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- ── Default rate for piece-based (shown when piece-based) -->
+                    <group invisible="not milk_is_piece_based">
+                        <group string="Default Billing Rate">
+                            <field name="milk_rate_per_crate"
+                                   string="Rate per Piece (Rs)"
+                                   help="Default rate per piece used in dispatch lines. Dealer-specific rates always override this."/>
+                            <div class="text-muted" style="font-size:12px;">
+                                Dealer-specific rates (Configuration → Dealer Rates)
+                                take priority over this value.
+                            </div>
+                        </group>
+                    </group>
+
+                    <!-- ── Crate summary banner (crate-based, configured) ─ -->
+                    <div class="alert alert-success" role="alert"
+                         invisible="milk_pieces_per_crate == 0 or milk_is_piece_based">
+                        <strong>Crate summary:</strong>
+                        1 crate =
+                        <field name="milk_pieces_per_crate"
+                               nolabel="1"
+                               readonly="1"
+                               class="oe_inline"/>
+                        pieces
+                        <span invisible="not milk_allow_half_crate">
+                            · Half-crate ordering <strong>enabled</strong>
+                        </span>
+                        <span invisible="milk_allow_half_crate">
+                            · Whole crates only
+                        </span>
+                    </div>
+
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+</odoo>

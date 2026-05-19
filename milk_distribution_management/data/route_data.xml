@@ -1,0 +1,24 @@
+<odoo>
+<data noupdate="1">
+    <!--
+        Seed data for the 3 routes that were previously hardcoded as a
+        Selection field on milk.dispatch.sheet. noupdate="1" means these
+        records are created on first install and never touched on upgrade,
+        so any renames made by the user in production are preserved.
+    -->
+    <record id="route_rashmi_am" model="milk.route">
+        <field name="name">Rashmi AM</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="route_giriraj_am" model="milk.route">
+        <field name="name">Giriraj AM</field>
+        <field name="active" eval="True"/>
+    </record>
+
+    <record id="route_pm" model="milk.route">
+        <field name="name">PM</field>
+        <field name="active" eval="True"/>
+    </record>
+</data>
+</odoo>

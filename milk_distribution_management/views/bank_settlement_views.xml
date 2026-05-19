@@ -1,0 +1,251 @@
+<odoo>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.bank.deposit  — Form View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_bank_deposit_form" model="ir.ui.view">
+        <field name="name">milk.bank.deposit.form</field>
+        <field name="model">milk.bank.deposit</field>
+        <field name="arch" type="xml">
+            <form string="Bank Deposit">
+                <header>
+                    <button name="action_confirm" string="Confirm"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Cancel"
+                            type="object" class="btn-danger"
+                            invisible="state not in ('draft',)"/>
+                    <button name="action_reset_draft" string="Reset to Draft"
+                            type="object"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Deposit Details">
+                            <field name="date"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="bank_name"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="account_number"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="deposit_slip_ref"
+                                   readonly="state == 'confirmed'"/>
+                        </group>
+                        <group string="Amounts">
+                            <field name="amount"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="total_collections" readonly="1"/>
+                            <field name="difference" readonly="1"
+                                   decoration-danger="difference != 0"
+                                   decoration-success="difference == 0"
+                                   widget="float"/>
+                        </group>
+                    </group>
+                    <group string="Cash Collections Covered">
+                        <field name="collection_ids" nolabel="1"
+                               readonly="state == 'confirmed'"
+                               widget="many2many_tags"/>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1"
+                               readonly="state == 'confirmed'"
+                               placeholder="Optional remarks…"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Bank Deposit List ════════════════════════════════════════════════ -->
+    <record id="view_bank_deposit_list" model="ir.ui.view">
+        <field name="name">milk.bank.deposit.list</field>
+        <field name="model">milk.bank.deposit</field>
+        <field name="arch" type="xml">
+            <list string="Bank Deposits"
+                  decoration-success="state == 'confirmed'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="bank_name"/>
+                <field name="deposit_slip_ref"/>
+                <field name="amount" sum="Total Deposited"/>
+                <field name="total_collections" sum="Total Collections"/>
+                <field name="difference" sum="Net Difference"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-danger="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Bank Deposit Search ══════════════════════════════════════════════ -->
+    <record id="view_bank_deposit_search" model="ir.ui.view">
+        <field name="name">milk.bank.deposit.search</field>
+        <field name="model">milk.bank.deposit</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="bank_name"/>
+                <field name="deposit_slip_ref"/>
+                <filter string="Draft" name="draft"
+                        domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="confirmed"
+                        domain="[('state','=','confirmed')]"/>
+                <group>
+                    <filter string="Bank" name="by_bank"
+                            context="{'group_by':'bank_name'}"/>
+                    <filter string="Date" name="by_date"
+                            context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Bank Deposit Window Action ═══════════════════════════════════════ -->
+    <record id="action_bank_deposit" model="ir.actions.act_window">
+        <field name="name">Bank Deposits</field>
+        <field name="res_model">milk.bank.deposit</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_bank_deposit_search"/>
+    </record>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         milk.dairy.transfer  — Form View
+         ══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_dairy_transfer_form" model="ir.ui.view">
+        <field name="name">milk.dairy.transfer.form</field>
+        <field name="model">milk.dairy.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Dairy Transfer">
+                <header>
+                    <button name="action_confirm" string="Confirm"
+                            type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_cancel" string="Cancel"
+                            type="object" class="btn-danger"
+                            invisible="state not in ('draft',)"/>
+                    <button name="action_reset_draft" string="Reset to Draft"
+                            type="object"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Transfer Details">
+                            <field name="date"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="dairy_name"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="payment_mode"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="utr_ref"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="purchase_id"
+                                   readonly="state == 'confirmed'"/>
+                        </group>
+                        <group string="Amounts">
+                            <field name="amount"
+                                   readonly="state == 'confirmed'"/>
+                            <field name="bill_amount" readonly="1"
+                                   invisible="not purchase_id"/>
+                            <field name="difference" readonly="1"
+                                   invisible="not purchase_id"
+                                   decoration-danger="abs(difference) &gt; 1"
+                                   decoration-success="abs(difference) &lt;= 1"
+                                   widget="float"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1"
+                               readonly="state == 'confirmed'"
+                               placeholder="Optional remarks…"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ══ Dairy Transfer List ══════════════════════════════════════════════ -->
+    <record id="view_dairy_transfer_list" model="ir.ui.view">
+        <field name="name">milk.dairy.transfer.list</field>
+        <field name="model">milk.dairy.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Dairy Transfers"
+                  decoration-success="state == 'confirmed'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="dairy_name"/>
+                <field name="payment_mode" widget="badge"
+                       decoration-info="payment_mode == 'neft'"
+                       decoration-primary="payment_mode == 'rtgs'"
+                       decoration-warning="payment_mode == 'cheque'"
+                       decoration-success="payment_mode == 'upi'"/>
+                <field name="utr_ref"/>
+                <field name="amount" sum="Total Transferred"/>
+                <field name="purchase_id" optional="show"/>
+                <field name="difference" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-danger="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ══ Dairy Transfer Search ════════════════════════════════════════════ -->
+    <record id="view_dairy_transfer_search" model="ir.ui.view">
+        <field name="name">milk.dairy.transfer.search</field>
+        <field name="model">milk.dairy.transfer</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="dairy_name"/>
+                <field name="utr_ref"/>
+                <filter string="Draft" name="draft"
+                        domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="confirmed"
+                        domain="[('state','=','confirmed')]"/>
+                <group>
+                    <filter string="Dairy" name="by_dairy"
+                            context="{'group_by':'dairy_name'}"/>
+                    <filter string="Payment Mode" name="by_mode"
+                            context="{'group_by':'payment_mode'}"/>
+                    <filter string="Date" name="by_date"
+                            context="{'group_by':'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ══ Dairy Transfer Window Action ═════════════════════════════════════ -->
+    <record id="action_dairy_transfer" model="ir.actions.act_window">
+        <field name="name">Dairy Transfers</field>
+        <field name="res_model">milk.dairy.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_dairy_transfer_search"/>
+    </record>
+
+</odoo>

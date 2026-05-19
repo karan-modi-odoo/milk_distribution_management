@@ -21,7 +21,8 @@
                     </group>
                     <field name="line_ids" readonly="1">
                         <list>
-                            <field name="driver_id" string="Driver"/>
+                            <field name="driver_id" string="Driver"
+                                   domain="[('milk_is_driver', '=', True)]"/>
                             <field name="total_sheets" string="Sheets" sum="Total"/>
                             <field name="total_dealers" string="Dealers Covered" sum="Total"/>
                             <field name="total_amount" string="Total Amount (Rs)" sum="Total"/>
